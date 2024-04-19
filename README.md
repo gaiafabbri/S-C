@@ -4,9 +4,11 @@
 # Project description
 The following project aims to classify signal and background images using machine learning techniques. Ci sono due file principali per l'addestramento sul dataset (vedi Folders organisation): uno basato su TMVA e l'altro sui framework definiti da Python come Tensorflow-Keras, Torch, BDT. 
 
-in particular, a comparison is made between TMVA (Toolkit for Multi-Variate Analysis) packages and Python libraries. The former includes CNN, DNN and Boosted Decision Tree (BDT); the latter implements the same algorithms: CNN is permormed with both keras-tensorflow and pytorch, BDT uses xgboost classifier, while DNN classification is based on keras-tensorflow methods. The models are evaluated in terms of precision, accuracy, f1-score and roc curve
+in particular, a comparison is made between TMVA (Toolkit for Multi-Variate Analysis) packages and Python libraries. The former includes CNN, DNN and BDT; the latter implements the same algorithms: CNN is permormed with both keras-tensorflow and pytorch, BDT uses xgboost classifier, while DNN classification is based on keras-tensorflow methods. The models are evaluated in terms of precision, accuracy, f1-score and roc curve. 
 
+I risultati ottenuti con un dataset di riferimento di dimensioni 16x16 e contentente 100'000 immagini per segnale e per rumore (totale 200'000) sono riportati qui di seguito. A tale dataset sono stati applicati una normalizzazione da 0 a 1 dei dati dei pixels, sono state create delle label "segnale" e "rumore" alle quali sono state associate dei numeri: 0 e 1 rispettivamente. Infine è stato effettuato una Principal Component Analysis(PCA) per ridurre le dimensioni del dataset combinato rumore-segnale. Quest'ultima cosa è vero per i 3 modelli che impiegano reti neurali, perché il BDT invece prende i risultati ottenuti dalla normalizzazione affiancati dalle label 0,1 per contraddistinguere segnale e rumore. Tutti gli algoritmi sono di tipo 1D quindi le immagini sono state trattate come array unidimensionali. Il tutto per tenere come referenza e osservare quanto migliorassero i risultati con o senza PCA.
 
+è stata fatta una prova anche con immagini 8x8 e un dataset, come prima, di 100'000 eventi per segnale e rumore. Queste volta le immagini sono state trattate solo con la normalizzazione e con la creazione di label "segnale"/"rumore" convertite poi a binari 0,1. Inoltre sono stati costuiti dei modelli 2D, e quindi le immagini sono state trattate come tali. Il motivo per il quale non è stata applicata alcune PCA è legato alla dimensionalità, visto che 8x8 restituisce come risultato 64, e non 256. Per questo motivo l'addestramento è stato fatto con reti neurali 2D e un BDT. 
 
 # Folders organisation 
 
@@ -39,44 +41,6 @@ The project structure includes:
 - Il "__dockerfile__" che è stato costruito nel caso in cui l'utente non abbia ROOT e/o Python. Esso crea un ambiente per poter usare sia ROOT, sia Python indipendentemente dalla presenza di uno o dell'altro sul computer. In termini pratici sostituirà l'eseguibile "run.sh" replicandone i compiti e la gestione del progetto.
 
 
-# Data Generation
-The dataset generation process utilizes the Generation.C module within the ROOT folder through the function "Generation". It prompts the user to choose between using a default file generated with dimensions 16x16 and 100,000 events for signal and background, or generating a custom dataset. In the latter case, the user has the freedom to define the dataset dimensions and image format, even non-square ones, with certain constraints.
-
-The "Generation" function requires three parameters: the number of images to generate ("n"), the height ("nh"), and the width ("nw") of the images. It defines a two-dimensional Gaussian distribution for both the signal and background using the ROOT TF2 class. The parameter "nRndmEvts" determines the number of events used to fill each image, representing the number of random events sampled from the signal and background distributions to create a single image example. A higher value of "nRndmEvts" can lead to more defined and realistic images but requires more computational resources to generate the data. Therefore, it is set to 10,000 (non-modifiable). The parameter "delta_sigma" represents the percentage difference in standard deviation (sigma) between the signal and background distributions. A higher value increases the difference between the widths of the background and signal distributions, making them easier to distinguish. It is also set to 5% and is non-modifiable. Random noise is added to the signal, linked to the variable "pixelNoise", representing the level of noise added to each pixel of the generated image. It measures the dispersion or random variation of pixel values.
-
-The variables "sX1", "sY1", "sX2", "sY2" represent the sigma values along the x and y axes for the first and second Gaussian distributions, respectively, where "sX2" is increased by 5% compared to "sX1", and "sY2" is decreased by 5% compared to "sY1". Two TH2D histograms are created using ROOT to store the data, along with two TF2 functions representing the Gaussian distributions. Two TTree trees are then created: one for signal data (sig_tree) and one for background data (bkg_tree). Branches of the trees ("vars") are defined to contain the image data, using a pointer to a float vector to store the data.
-
-
-he parameters for the two functions, "f1.SetParameters(1, 5, sX1, 5, sY1)" and "f2.SetParameters(1, 5, sX2, 5, sY2)", are defined with the following parameters, in order:
-- Maximum height of the Gaussian
-- Mean position along the x-axis
-- Standard deviation along the x-axis
-- Mean position along the y-axis
-- Standard deviation along the y-axis
-
-Inside the firstloop, the instructions "h1.FillRandom("f1", nRndmEvts)" and "h2.FillRandom("f2", nRndmEvts)" fill the histograms h1 and h2 with randomly generated data using the functions f1 and f2, respectively. The FillRandom() function takes the name of a function (in this case, f1 and f2) as an argument and generates random values for the histogram variables distributed according to the specified function's distribution.
-
-A second loop iterates through all cells (or bins) of the image, where "nh" represents the number of rows and "nw" represents the number of columns of the image. This loop traverses through each row and column of the image, allowing access and manipulation of each individual bin of the two-dimensional histogram. An index "m" is calculated for each bin, representing the position of the bin in the two-dimensional array x1 and x2. This is done by multiplying the row index by the number of columns and adding the column index. This index "m" is used to access the vectors x1 and x2, which contain the image data. For each bin of the image, random Gaussian noise is added using the function "gRandom->Gaus(0, pixelNoise)", which generates a random number distributed according to a Gaussian distribution with mean 0 and standard deviation "pixelNoise". This noise is added to the value of the bin obtained from the respective histograms h1 and h2, resulting in image data with added noise.
-
-
-## Some comments about dimension of images
-The code has been tested on the default dataset but adapted to cover a large scenario. Regarding the analysis conducted in Python, two preprocessing strategies are explored before training: with PCA or without PCA. The idea is that models could be either 1D or 2D, specifically in reference to Convolutional Neural Networks (CNN) using Keras-TensorFlow and Torch, as well as Deep Neural Networks (DNN). This depends on the dimensions of the dataset because, obviously, if we have 2x2 images, PCA will not be applied.
-
-A threshold is set for the image dimensions, such as 12x12 or any combination AxB where both A and B are less than 12 or their product is less than 144. If the product of the image's width and height exceeds 144, Principal Component Analysis (PCA) will be applied to enable training with 1D models. Otherwise, a 2D model is considered. Additionally, some limitations are imposed on the dimensions, as follows:
-
-- The product AxB cannot be less than 64.
-- A and/or B cannot individually exceed 24.
-- The product of AxB cannot exceed 576.
-- A and B must be integers.
-- A and/or B cannot be less than 8.
-
-## Some comments about dimension of dataset
-
-The dataset has been tested using 100'000 images for the signal and 100'000 for the background, producing consistent results with relatively low training time. Therefore, this value is considered as a reference (the results are presented in the corresponding section.). Indeed, experiments with datasets of 2'000 and 20'000 images yielded highly random and inconsistent results. For this reason, it is recommended that the dataset size be around 50'000 at least.
-
-Additionally, the dataset has been tested with 2 million and 1 million images, and the results obtained were practically compatible with those observed using a dataset of 200'000 images. Therefore, if a dataset larger than 200'000 images is provided, a dataset of 200'000 images (100'000 for signal and 100'000 for background) will be randomly selected, and the models will be trained using this dataset. 
-
-This ensures consistency and reliability in the results obtained from the training process.
 
 
 # Versioni usate e pacchetti richiesti
@@ -101,18 +65,93 @@ Il progetto si è basato su uno dei tutorials di TMVA nella pagina web di ROOT, 
 
 
 # Spiegazione Codice
+This section will examine the codes in detail, elucidating their operational characteristics. The aim is to provide a comprehensive analysis of their functionalities, elucidating each step to comprehensively understand what they do and how they accomplish it. 
 
 ## Gen_data.C
-Il file "Gen_Data.C" si occupa di generare i dati per mezzo della seguente funzione "...". L'obiettivo è lasciare all'utente la possibilità di personalizzare le immagini e le distribuzioni dei dati sotto alcune condizioni, che sono le seguenti:
-    - Le dimensioni possono essere solamente del tipo AxA quindi di dimensioni quadrate
-    - I dati possono essere generati in accordo con le seguenti distribuzioni: Gaussiana, ...
-    - Le immagini di segnali e background avranno le stesse dimensioni e le stesse distribuzioni
-    - Se non specificato niente, il programma genera di default immagini 16x16 con dati distribuiti secondo una gaussiana.
-Il codice lavora in questo modo: ....
+The dataset generation process utilizes the Generation.C module within the ROOT folder through the function "Generation". It prompts the user to choose between using a default file generated with dimensions 16x16 and 100,000 events for signal and background, or generating a custom dataset. In the latter case, the user has the freedom to define the dataset dimensions and image format, even non-square ones, with certain constraints.
+
+The "Generation" function requires three parameters: the number of images to generate ("n"), the height ("nh"), and the width ("nw") of the images. It defines a two-dimensional Gaussian distribution for both the signal and background using the ROOT TF2 class. The parameter "nRndmEvts" determines the number of events used to fill each image, representing the number of random events sampled from the signal and background distributions to create a single image example. A higher value of "nRndmEvts" can lead to more defined and realistic images but requires more computational resources to generate the data. Therefore, it is set to 10,000 (non-modifiable). The parameter "delta_sigma" represents the percentage difference in standard deviation (sigma) between the signal and background distributions. A higher value increases the difference between the widths of the background and signal distributions, making them easier to distinguish. It is also set to 5% and is non-modifiable. Random noise is added to the signal, linked to the variable "pixelNoise", representing the level of noise added to each pixel of the generated image. It measures the dispersion or random variation of pixel values.
+
+The variables "sX1", "sY1", "sX2", "sY2" represent the sigma values along the x and y axes for the first and second Gaussian distributions, respectively, where "sX2" is increased by 5% compared to "sX1", and "sY2" is decreased by 5% compared to "sY1". Two TH2D histograms are created using ROOT to store the data, along with two TF2 functions representing the Gaussian distributions. Two TTree trees are then created: one for signal data (sig_tree) and one for background data (bkg_tree). Branches of the trees ("vars") are defined to contain the image data, using a pointer to a float vector to store the data.
+
+
+he parameters for the two functions, "f1.SetParameters(1, 5, sX1, 5, sY1)" and "f2.SetParameters(1, 5, sX2, 5, sY2)", are defined with the following parameters, in order:
+- Maximum height of the Gaussian
+- Mean position along the x-axis
+- Standard deviation along the x-axis
+- Mean position along the y-axis
+- Standard deviation along the y-axis
+
+Inside the firstloop, the instructions "h1.FillRandom("f1", nRndmEvts)" and "h2.FillRandom("f2", nRndmEvts)" fill the histograms h1 and h2 with randomly generated data using the functions f1 and f2, respectively. The FillRandom() function takes the name of a function (in this case, f1 and f2) as an argument and generates random values for the histogram variables distributed according to the specified function's distribution.
+
+A second loop iterates through all cells (or bins) of the image, where "nh" represents the number of rows and "nw" represents the number of columns of the image. This loop traverses through each row and column of the image, allowing access and manipulation of each individual bin of the two-dimensional histogram. An index "m" is calculated for each bin, representing the position of the bin in the two-dimensional array x1 and x2. This is done by multiplying the row index by the number of columns and adding the column index. This index "m" is used to access the vectors x1 and x2, which contain the image data. For each bin of the image, random Gaussian noise is added using the function "gRandom->Gaus(0, pixelNoise)", which generates a random number distributed according to a Gaussian distribution with mean 0 and standard deviation "pixelNoise". This noise is added to the value of the bin obtained from the respective histograms h1 and h2, resulting in image data with added noise.
+
+
+### Some comments about dimension of images
+The code has been tested on the default dataset but adapted to cover a large scenario. Regarding the analysis conducted in Python, two preprocessing strategies are explored before training: with PCA or without PCA. The idea is that models could be either 1D or 2D, specifically in reference to Convolutional Neural Networks (CNN) using Keras-TensorFlow and Torch, as well as Deep Neural Networks (DNN). This depends on the dimensions of the dataset because, obviously, if we have 2x2 images, PCA will not be applied.
+
+A threshold is set for the image dimensions, such as 10x10 or any combination AxB where both A and B are less than 10 or their product is less than 100. If the product of the image's width and height exceeds 100, Principal Component Analysis (PCA) will be applied to enable training with 1D models. Otherwise, a 2D model is considered. Additionally, some limitations are imposed on the dimensions, as follows:
+
+- A and/or B cannot individually exceed 20.
+- A and B must be integers.
+- A and/or B cannot be less than 8.
+
+### Some comments about dimension of dataset !!!!!!PENDING
+
+The dataset has been tested using 25'000 images for the signal and 100'000 for the background, producing consistent results with relatively low training time. Therefore, this value is considered as a reference (the results are presented in the corresponding section.). 
+
+'''CONSIGLIARE DIMENSIONI DATASET'''
+
+Additionally, the dataset has been tested with 2 million and 1 million images, and the results obtained were practically compatible with those observed using a dataset of 200'000 images. Therefore, if a dataset larger than 200'000 images is provided, a dataset of 200'000 images (100'000 for signal and 100'000 for background) will be randomly selected, and the models will be trained using this dataset. 
+
+This ensures consistency and reliability in the results obtained from the training process.
+
 
 ## TMVA.C
 
-## Keras.py
+### Preparing the environment
+Questo codice è un esempio di utilizzo di TMVA (Toolkit for Multivariate Analysis) per la classificazione utilizzando una CNN, una DNN e un BDT. Viene definita una funzione denominata "TMVA" che prende come input il numero di eventi "nevts" e "opt" per la scelta dei metodi da usare per la classificazione. Successivamente viene estratta la dimensione delle immagini di input dal nome del file e così anche il numero di eventi. Vengono impostate le opzioni di utilizzo dei vari metodi TMVA, verificando se sono disponibili le versioni CPU o GPU. Se è abilitato l'uso di OpenMP, viene impostato il numero di thread a 4 e viene disabilitato il multithreading di OpenBLAS per evitare conflitti.
+
+### Preparing dataset
+Questa parte del codice si occupa di preparare i dati per l'addestramento e il test dei modelli di classificazione. Ecco una spiegazione più dettagliata. Viene creato un oggetto TMVA::DataLoader per gestire i dati di input. Vengono ottenuti i puntatori ai TTree contenenti gli eventi di segnale e di background dal file di input utilizzando "TFile::Get<TTree>("nome_albero")". Viene calcolato il numero totale di eventi di segnale ("nEventsSig") e di background ("nEventsBkg") presenti nei TTree. I TTree di segnale e di background vengono aggiunti al DataLoader utilizzando "loader.AddSignalTree" e "loader.AddBackgroundTree". Viene aggiunta un'array di variabili di input (nel caso delle immagini, la dimensione dell'array di pixel) al DataLoader utilizzando "loader.AddVariablesArray". Successivamente è possibile impostare pesi individuali per gli eventi di segnale e di background utilizzando "factory->SetSignalWeightExpression" e "factory->SetBackgroundWeightExpression". È possibile applicare tagli aggiuntivi sugli eventi di segnale e di background utilizzando le variabili mycuts e mycutb. Viene definito il numero di eventi di segnale e di background da utilizzare per l'addestramento (80% dei dati) e per il test (20% dei dati). Vengono costruite le opzioni per la preparazione dei dati di addestramento e test, specificando il numero di eventi di segnale e di background da utilizzare e altre opzioni come la modalità di divisione dei dati. Infine, i dati vengono preparati per l'addestramento e il test utilizzando loader.PrepareTrainingAndTestTree.
+
+### Choice and Training of TMVA methods 
+The initial segment of the code is dedicated to configuring TMVA methods for training classification models (BDT, CNN, and DNN with TMVA). Subsequently, the following actions are performed:
+- "factory.TrainAllMethods()": This method trains all the specified methods (in this case, BDT, DNN, and CNN) using the previously prepared training data.
+- "factory.TestAllMethods()": It tests all the trained methods using the pre-prepared test data.
+- "factory.EvaluateAllMethods()": This step evaluates the performance of all the trained methods using appropriate metrics.
+- "auto c1 = factory.GetROCCurve(&loader)": It obtains the ROC curve for all the trained methods using the input data provided by the DataLoader named loader.
+
+#### 1) TMVA_BDT
+If "useTMVABDT" is true, the boosted decision tree (BDT) method is booked using "factory.BookMethod". Various options are specified for the BDT:
+- "NTrees=200": Specifies the number of decision trees (or estimators) to use in the BDT. Here, 200 trees are used.
+- "MinNodeSize=2.5%": Sets the minimum node size, controlling the minimum number of events required in a node for further splitting. Here, it's set to 2.5% of the total number of events.
+- "MaxDepth=2": Specifies the maximum depth of the decision tree. Limiting the tree depth can help prevent overfitting.
+- "BoostType=AdaBoost": Specifies the boosting type to use. Here, AdaBoost is used.
+- "AdaBoostBeta=0.5": Sets the beta parameter of AdaBoost, controlling the importance of the weight of previous errors versus current ones.
+- "UseBaggedBoost": Enables the use of bagging along with AdaBoost. Bagging enhances model stability and accuracy by reducing variance.
+- "BaggedSampleFraction=0.5": Specifies the fraction of events to use for training each tree within bagging. Here, it's set to 50%.
+- "SeparationType=GiniIndex": Specifies the separation criterion used for splitting nodes during tree construction. Here, Gini index is used.
+- "nCuts=20": Specifies the maximum number of cut points to be tested for each variable predicate. A higher number may lead to higher precision but may also increase training time.
+
+  
+#### 2) TMVA_DNN
+This code block books the deep neural network (DNN) method via TMVA. Here's an explanation of the provided options:
+- "Layout": Defines the neural network architecture. In this case, the network has four dense layers with 100 neurons each, using ReLU activation and batch normalization. The last layer is a single neuron with linear activation, typically used for regression problems.
+- "TrainingStrategy": Specifies the training strategies for the DNN. It includes parameters like learning rate, momentum, repetitions, convergence steps, batch size, etc...
+- "Architecture": Specifies the neural network architecture (CPU or GPU) depending on availability. If TMVA is compiled with GPU support, the GPU architecture will be used; otherwise, the CPU architecture will be used.
+
+
+
+#### 3) TMVA_CNN
+This code block books the convolutional neural network (CNN) method via TMVA. Here's an explanation of the provided options:
+- "Input Layout": Specifies the input layout of the network. Here, the input image has a single channel (grayscale) with a height and width of 16 pixels each
+- "Batch Layout": Specifies the input batch layout. Here, the batch size is 100, the number of channels is 1, and the image size is 16x16.
+- "Layout": Defines the CNN architecture, including convolutional layers, MaxPooling layer, Reshape layer, and dense layers.
+- "TrainingStrategy": Specifies the training strategies for the CNN, similar to those for the DNN.
+- "Architecture": Specifies the neural network architecture (CPU or GPU) depending on availability, similar to the DNN setup.
+
+
 
 ## Program_Start.py
 This Python script is designed to perform a series of training and evaluation operations on different machine learning models, comparing them with each other. The process involves the use of convolutional neural networks (CNNs) implemented both with TensorFlow-Keras and PyTorch, a gradient boosting algorithm (BDT), and a densely connected neural network (DNN). The final comparison is done through the creation and visualization of ROC curves for each model.
@@ -126,7 +165,8 @@ The code relies on multiple Python libraries, including os, tensorflow, numpy, p
 ### 2) DATA LOADING & NORMALIZATION
 - _Extraction Features_: The code extracts several variables from the file names: the number of events, stored as event_number, and the height and width of the images, stored as height and width, respectively. These variables serve as inputs for subsequent steps in the code.
 - _File Path and Data Loading_: This functionality is implemented using the "load_and_normalize_images" function. The code takes two inputs: the folder path containing the images and the file name. It utilizes Uproot to open the specified file and loads the data for both signal and background images.
-- _Data Normalization_: Implemented using the "load_and_normalize_images" function, this step calculates the maximum pixel values for both signal and background images. The images are then normalized by dividing each pixel by the calculated maximum value. This ensures that all pixel values are scaled between 0 and 1, making the data comparable and facilitating model training. To reduce computational burden, the code employs a batch approach, performing normalizations on batches of images instead of the entire dataset at once.
+- _Data Normalization_: Implemented using the "load_and_normalize_images" function, this step calculates the maximum pixel values for both signal and background images. The images are then normalized by dividing each pixel by the calculated maximum value. This ensures that all pixel values are scaled between 0 and 1, making the data comparable and facilitating model training.
+  
 
 ### 3) DATA PREPARATION
 In this code section, we prepare the data for machine learning tasks by converting signal and background images into NumPy arrays and defining features and labels.
@@ -167,6 +207,12 @@ For the PyTorch-based model, we utilize the `trained_model` function to train th
 - _print_ROC_: This function computes and displays the Receiver Operating Characteristic (ROC) curve and the confusion matrix of the neural network model on the test data. It takes the test labels (y_test), the model's continuous predictions (y_pred), and the rounded binary predictions (y_pred_classes) as input. The function calculates the ROC curve using the continuous predictions and visualizes the confusion matrix. It returns the background rejection rate and the signal efficiency.
 - _plot_training_curves_KERAS_: This function visualizes the training and validation curves of the neural network. It takes the history object returned during the neural network training process and plots the accuracy and loss curves for training and validation.
 
+#### 4.4) Table function:
+Inside the Table file, the save_results_table function is designed to save the evaluation metrics results of the models (f1, accuracy, precision) and the training time into a Pandas DataFrame, and then draw a table using Matplotlib. Here are the parameters:
+- "model_results":  A dictionary containing the evaluation metrics results for each model. The keys of the dictionary are the model names, and the values are tuples containing accuracy, precision, f1 score, and training time.
+- "results_df": The Pandas DataFrame containing the models' evaluation results. If it's None (i.e., when the code is run for the first time), a new DataFrame will be created.
+
+The function iterates through the model results in the "model_results" dictionary. For each model, it extracts accuracy, precision, f1 score, and training time from the respective tuple and adds them as a new row to the "results_df" DataFrame. Finally, it draws a table containing the results.
 
 
 

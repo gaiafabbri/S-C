@@ -14,20 +14,20 @@ void Generation(int n, int nh, int nw)
 
     const int nRndmEvts = 10000; // number of events we use to fill each image
     double delta_sigma = 0.1;    // 5% difference in the sigma
-    double pixelNoise = 5;
+    double pixelNoise = 5; //level of noise added to each pixel of the generated image.
 
-    double sX1 = 3;
-    double sY1 = 3;
+    double sX1 = 3; //sigma values
+    double sY1 = 3; //One of the two pairs is assigned to the bkg and the other to the sig
     double sX2 = sX1 + delta_sigma;
     double sY2 = sY1 - delta_sigma;
 
-    TH2D h1("h1", "h1", nh, 0, 10, nw, 0, 10);
+    TH2D h1("h1", "h1", nh, 0, 10, nw, 0, 10); //histo for sig and bkg
     TH2D h2("h2", "h2", nh, 0, 10, nw, 0, 10);
 
-    TF2 f1("f1", "xygaus");
+    TF2 f1("f1", "xygaus"); //2D gaussian functions
     TF2 f2("f2", "xygaus");
 
-    TTree sgn("sig_tree", "signal_tree");
+    TTree sgn("sig_tree", "signal_tree");  
     TTree bkg("bkg_tree", "background_tree");
 
     std::vector<float> x1(ntot);
