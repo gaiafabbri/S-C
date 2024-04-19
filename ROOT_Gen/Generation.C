@@ -1,6 +1,6 @@
 #include <TSystem.h>
 
-void Gauss(int n, int nh, int nw)
+void Generation(int n, int nh, int nw)
 {
     // image size (nh x nw)
     const int ntot = nh * nw;
