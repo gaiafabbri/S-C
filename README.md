@@ -40,13 +40,35 @@ The project structure includes:
 
 
 # Data Generation
-Il dataset viene generato utilizzando ROOT (vedi Folders organisation) e chiedendo all'utente se usare un file generato di default 16x16 con 100'000 eventi per segnale e per rumore, oppure se generarlo lui, e in quel caso l'utente avrà il libero arbitrio di generare il dataset delle dimensioni che vorrà e con immagini del formato che desidera, anche non quadrata. __COMMENTARE__
+The dataset generation process utilizes the Generation.C module within the ROOT folder through the function "Generation". It prompts the user to choose between using a default file generated with dimensions 16x16 and 100,000 events for signal and background, or generating a custom dataset. In the latter case, the user has the freedom to define the dataset dimensions and image format, even non-square ones, with certain constraints.
+
+The "Generation" function requires three parameters: the number of images to generate ("n"), the height ("nh"), and the width ("nw") of the images. It defines a two-dimensional Gaussian distribution for both the signal and background using the ROOT TF2 class. The parameter "nRndmEvts" determines the number of events used to fill each image, representing the number of random events sampled from the signal and background distributions to create a single image example. A higher value of "nRndmEvts" can lead to more defined and realistic images but requires more computational resources to generate the data. Therefore, it is set to 10,000 (non-modifiable). The parameter "delta_sigma" represents the percentage difference in standard deviation (sigma) between the signal and background distributions. A higher value increases the difference between the widths of the background and signal distributions, making them easier to distinguish. It is also set to 5% and is non-modifiable. Random noise is added to the signal, linked to the variable "pixelNoise", representing the level of noise added to each pixel of the generated image. It measures the dispersion or random variation of pixel values.
+
+The variables "sX1", "sY1", "sX2", "sY2" represent the sigma values along the x and y axes for the first and second Gaussian distributions, respectively, where "sX2" is increased by 5% compared to "sX1", and "sY2" is decreased by 5% compared to "sY1". Two TH2D histograms are created using ROOT to store the data, along with two TF2 functions representing the Gaussian distributions. Two TTree trees are then created: one for signal data (sig_tree) and one for background data (bkg_tree). Branches of the trees ("vars") are defined to contain the image data, using a pointer to a float vector to store the data.
+
+
+he parameters for the two functions, "f1.SetParameters(1, 5, sX1, 5, sY1)" and "f2.SetParameters(1, 5, sX2, 5, sY2)", are defined with the following parameters, in order:
+- Maximum height of the Gaussian
+- Mean position along the x-axis
+- Standard deviation along the x-axis
+- Mean position along the y-axis
+- Standard deviation along the y-axis
+
+Inside the firstloop, the instructions "h1.FillRandom("f1", nRndmEvts)" and "h2.FillRandom("f2", nRndmEvts)" fill the histograms h1 and h2 with randomly generated data using the functions f1 and f2, respectively. The FillRandom() function takes the name of a function (in this case, f1 and f2) as an argument and generates random values for the histogram variables distributed according to the specified function's distribution.
+
+A second loop iterates through all cells (or bins) of the image, where "nh" represents the number of rows and "nw" represents the number of columns of the image. This loop traverses through each row and column of the image, allowing access and manipulation of each individual bin of the two-dimensional histogram. An index "m" is calculated for each bin, representing the position of the bin in the two-dimensional array x1 and x2. This is done by multiplying the row index by the number of columns and adding the column index. This index "m" is used to access the vectors x1 and x2, which contain the image data. For each bin of the image, random Gaussian noise is added using the function "gRandom->Gaus(0, pixelNoise)", which generates a random number distributed according to a Gaussian distribution with mean 0 and standard deviation "pixelNoise". This noise is added to the value of the bin obtained from the respective histograms h1 and h2, resulting in image data with added noise.
 
 
 ## Some comments about dimension of images
-The code has been tested on the default dataset but adapted to cover a general scenario. Regarding the analysis conducted in Python, two preprocessing strategies are explored before training: with PCA or without PCA. The idea is that models could be either 1D or 2D, specifically in reference to Convolutional Neural Networks (CNN) using Keras-TensorFlow and Torch, as well as Deep Neural Networks (DNN). This depends on the dimensions of the dataset because, obviously, if we have 2x2 images, PCA will not be applied.
+The code has been tested on the default dataset but adapted to cover a large scenario. Regarding the analysis conducted in Python, two preprocessing strategies are explored before training: with PCA or without PCA. The idea is that models could be either 1D or 2D, specifically in reference to Convolutional Neural Networks (CNN) using Keras-TensorFlow and Torch, as well as Deep Neural Networks (DNN). This depends on the dimensions of the dataset because, obviously, if we have 2x2 images, PCA will not be applied.
 
-A threshold is established around the image dimensions, such as 12x12 or any combination AxB where both A and B are less than 12 or thei product is lower than 144. If the images width and height product exceeds 144, PCA will be applied to enable training with 1D models, otherwise a 2D model is considered.
+A threshold is set for the image dimensions, such as 12x12 or any combination AxB where both A and B are less than 12 or their product is less than 144. If the product of the image's width and height exceeds 144, Principal Component Analysis (PCA) will be applied to enable training with 1D models. Otherwise, a 2D model is considered. Additionally, some limitations are imposed on the dimensions, as follows:
+
+- The product AxB cannot be less than 64.
+- A and/or B cannot individually exceed 24.
+- The product of AxB cannot exceed 576.
+- A and B must be integers.
+- A and/or B cannot be less than 8.
 
 ## Some comments about dimension of dataset
 

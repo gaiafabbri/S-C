@@ -187,7 +187,6 @@ Gen_files(){
             generare)
                 echo "Generiamo il dataset, ti chiederò di scegliere le dimensioni delle immagini, il numero di dati per il file di bkg e sig, e la distribuzione di dati:"
                 
-                # Chiedi all'utente di inserire il numero di dati (n) e controlla se è un numero
                 while true; do
                     read -p "Inserisci il numero di dati (n): " n
                     if [[ $n =~ ^[0-9]+$ ]]; then
@@ -196,28 +195,33 @@ Gen_files(){
                         echo "Errore: inserisci un numero valido."
                     fi
                 done
-                
-                # Chiedi all'utente di inserire l'altezza delle immagini (nh) e controlla se è un numero
-                while true; do
-                    read -p "Inserisci l'altezza delle immagini (nh): " nh
-                    if [[ $nh =~ ^[0-9]+$ ]]; then
+                while true; do  # Aggiunto 'do' qui
+                    # Chiedi all'utente di inserire l'altezza delle immagini (nh) e controlla se è un numero
+                    while true; do
+                        read -p "Inserisci l'altezza delle immagini compresa tra 8 e 24 (nh): " nh
+                        if [[ $nh =~ ^[0-9]+$ && $nh -ge 8 && $nh -le 24 ]]; then
+                            break
+                        else
+                            echo "Errore: inserisci un numero valido."
+                        fi
+                    done
+
+                    # Chiedi all'utente di inserire la larghezza delle immagini (nw) e controlla se è un numero
+                    while true; do
+                        read -p "Inserisci la larghezza delle immagini compresa tra 8 e 24 (nw): " nw
+                        if [[ $nw =~ ^[0-9]+$ && $nw -ge 8 && $nw -le 24 ]]; then
+                            break
+                        else
+                            echo "Errore: inserisci un numero valido."
+                        fi
+                    done
+                     if [[ $(($nh * $nw)) -ge 64 && $(($nh * $nw)) -le 576 ]]; then
                         break
                     else
-                        echo "Errore: inserisci un numero valido."
+                        echo "Errore: il prodotto di nh * nw deve essere compreso tra 64 e 576."
                     fi
                 done
-
-                # Chiedi all'utente di inserire la larghezza delle immagini (nw) e controlla se è un numero
-                while true; do
-                    read -p "Inserisci la larghezza delle immagini (nw): " nw
-                    if [[ $nw =~ ^[0-9]+$ ]]; then
-                        break
-                    else
-                        echo "Errore: inserisci un numero valido."
-                    fi
-                done
-
-                # Esegui il comando ROOT per generare il dataset
+                 # Esegui il comando ROOT per generare il dataset
                 root -l -q "ROOT/Gauss.C($n, $nh, $nw)"
                 break  # Esci dal ciclo while esterno dopo aver completato la scelta
                 ;;
