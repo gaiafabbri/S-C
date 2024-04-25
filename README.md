@@ -1,43 +1,52 @@
-# S-C
+# S-C Project description
+The project compares machine learning techniques for classifying signal and background images, utilizing two main approaches: one based on the TMVA (Toolkit for Multi-Variate Analysis) packages and the other on Python frameworks such as TensorFlow-Keras, PyTorch, and XGBoost for BDT classification. In particular, the comparison includes CNN, DNN, and BDT algorithms. For TMVA, these algorithms are employed directly, while in Python, CNN is implemented using both Keras-TensorFlow and PyTorch, BDT uses XGBoost classifier, and DNN classification is based on Keras-TensorFlow methods. The models are evaluated based on precision, accuracy, F1-score, and ROC curve.
 
 
-# Project description
-The following project aims to classify signal and background images using machine learning techniques. Ci sono due file principali per l'addestramento sul dataset (vedi Folders organisation): uno basato su TMVA e l'altro sui framework definiti da Python come Tensorflow-Keras, Torch, BDT. 
+The results are obtained using a dataset of 16x16 images, containing 100,000 images each for signal and background (totaling 200,000 images). This dataset is generated with parameters such as: 100,000 events (n), image height and width of 16 bins each (nh = nw = 16), and each bin is filled with 10,000 events (nRndmEvts). The signal and background distributions have a 5% difference in standard deviation (delta_sigma), and Gaussian noise of 5 is added to each bin of the signal (pixelNoise). Within each bin, data are generated using Gaussian distributions centered on the values obtained from the fits of two functions, with additional Gaussian noise.
 
-in particular, a comparison is made between TMVA (Toolkit for Multi-Variate Analysis) packages and Python libraries. The former includes CNN, DNN and BDT; the latter implements the same algorithms: CNN is permormed with both keras-tensorflow and pytorch, BDT uses xgboost classifier, while DNN classification is based on keras-tensorflow methods. The models are evaluated in terms of precision, accuracy, f1-score and roc curve. 
+In Python, the dataset undergoes normalization of pixel data to a range of 0 to 1, label creation for signal and background (assigned numbers 0 and 1 respectively), and Principal Component Analysis (PCA) for dimensionality reduction. This preprocessing is applied to neural network models, while BDT utilizes normalized data with labels for signal and background without PCA. The results of the comparison among various machine learning techniques are presented below. 
+![Comparison_among_models_100000_16x16](https://github.com/gaiafabbri/S-C/assets/133896928/f07ba211-bb44-4383-aafb-3172c9b1635c)
 
-I risultati ottenuti con un dataset di riferimento di dimensioni 16x16 e contentente 100'000 immagini per segnale e per rumore (totale 200'000) sono riportati qui di seguito. A tale dataset sono stati applicati una normalizzazione da 0 a 1 dei dati dei pixels, sono state create delle label "segnale" e "rumore" alle quali sono state associate dei numeri: 0 e 1 rispettivamente. Infine è stato effettuato una Principal Component Analysis(PCA) per ridurre le dimensioni del dataset combinato rumore-segnale. Quest'ultima cosa è vero per i 3 modelli che impiegano reti neurali, perché il BDT invece prende i risultati ottenuti dalla normalizzazione affiancati dalle label 0,1 per contraddistinguere segnale e rumore. Tutti gli algoritmi sono di tipo 1D quindi le immagini sono state trattate come array unidimensionali. Il tutto per tenere come referenza e osservare quanto migliorassero i risultati con o senza PCA.
 
-è stata fatta una prova anche con immagini 8x8 e un dataset, come prima, di 100'000 eventi per segnale e rumore. Queste volta le immagini sono state trattate solo con la normalizzazione e con la creazione di label "segnale"/"rumore" convertite poi a binari 0,1. Inoltre sono stati costuiti dei modelli 2D, e quindi le immagini sono state trattate come tali. Il motivo per il quale non è stata applicata alcune PCA è legato alla dimensionalità, visto che 8x8 restituisce come risultato 64, e non 256. Per questo motivo l'addestramento è stato fatto con reti neurali 2D e un BDT. 
+For TMVA, the dataset is normalized using NormMode=NumEvents (average weight of 1 per event, independently for signal and background, eventually coud be done with "EqualNumEvents"), and no transformations are applied to the data. The models are trained accordingly. Results are visualized to compare the performance of different algorithms. The results of the comparison among various machine learning techniques are presented below. 
+
+##METTERE IMMAGINE QUI!!!!####
+
+For further details and explanations regarding the code implementation, please refer to the specific section.
+
+
+# Comments on results obtained
+
+
+
+
 
 # Folders organisation 
 
 The project structure includes:
 
 - A folder named "__ROOT_Gen__" that holds a file named "Generation.C". This file is responsible for generating the dataset of images which are saved into "images" subfolder to be used. For more details on dataset generation, refer to the dataset section.
-- Another folder named "__CNN_python__", which encompasses several subfolders and generates an additional folder post-code execution: plot_results" which aids in visualizing training parameters alongside the Receiver Operating Characteristic (ROC) curve. This curve illustrates signal efficiency versus background rejection for each model. The "plot_results" folder also contains a comparative visualization of ROC curves and a table showcasing performance metrics such as f1 score, accuracy, precision, and training time across different models.
+- Another folder named "__Python_code__", which encompasses several subfolders and generates an additional folder post-code execution: "plot_results" which aids in visualizing training parameters alongside the Receiver Operating Characteristic (ROC) curve. This curve illustrates signal efficiency versus background rejection for each model. The "plot_results" folder also contains a comparative visualization of ROC curves and a table showcasing performance metrics such as f1 score, accuracy, precision, and training time across different models.
     - There's "_Program_Start.py_" which serves as the main execution script for machine learning methods. These methods include Convolutional Neural Networks (CNN) implemented with both Torch and TensorFlow-Keras, as well as Boosted Decision Trees (BDT) and Deep Neural Networks (DNN) with Keras. The script acts as an interface with the user, orchestrating functions imported from Python scripts in the subfolders to create a unified training file according to user-selected models. Detailed explanations are provided within the code comments.
     - The "_DataPreparation_" subfolder houses scripts for data preparation, including:
         - "Data_Preparation.py" for loading data into arrays and subsequent normalization.
-        - "reshaping.py" for reshaping data, particularly useful when training involves image data (2D).
         - "PCA.py" for data preparation when training involves numpy arrays (1D).
-        - "shuffle.py" for shuffling dataset entries.
-    - The "_Models_" subfolder contains various model implementations, each available in both 1D (after Principal Component Analysis, PCA) and 2D versions (without PCA). Notably, the BDT implementation is an exception. Files within this subfolder include:
+        - "Preparing_Dataset.py" is designed to facilitate the preparation of datasets for the machine learning techniques.
+    - The "_Models_" subfolder contains various model implementations, each available in 1D (after PCA, except BDT). Files within this subfolder include:
          - "model_BDT.py"
          - "model_DNN_PCA.py"
-         - "model_DNN.py"
-         - "model_keras_noPCA.py"
          - "model_keras_PCA.py"
-         - "model_Torch_noPCA.py"
          - "model_Torch_PCA.py"
       - Lastly, the "_Evaluation_" subfolder hosts files for assessing model performance, including:
-        - "PredictionNN.py", designed for both CNNs implemented with Keras-TensorFlow.
+        - "PredictionNN.py", designed for both NNs implemented with Keras-TensorFlow.
         - "PredictionBDT.py"
         - "TrainTorch.py"
         - "Table.py", responsible for tabulating results from each model (f1 score, accuracy, precision), highlighting the best-performing model. Additionally, it includes a column displaying the training time for each investigated model.
 - Inside the project, there's also a folder named "__TMVA_ML__". This folder contains a file named "TMVA.C". When executed with the provided bash file (see below), it will generate an additional folder named "images". This folder is generated using "Generation.C" and contains the dataset created. The methods implemented within "TMVA.C" include a Convolutional Neural Network (CNN), Deep Neural Network (DNN), and Boosted Decision Tree (BDT). This file originates from an example provided in the ROOT tutorials, accessible via the following link: 'https://root.cern/doc/master/TMVA__CNN__Classification_8C.html'
 
 - An executable bash file called '__Script.sh__' which serves as a tool for project setup and management. It automates various tasks such as project cleanup, verification of ROOT and Python installations, library compatibility checks, and dataset generation. It allows users to select their preferred training environment (ROOT or Python).
+
+- 
 - Il "__dockerfile__" che è stato costruito nel caso in cui l'utente non abbia ROOT e/o Python. Esso crea un ambiente per poter usare sia ROOT, sia Python indipendentemente dalla presenza di uno o dell'altro sul computer. In termini pratici sostituirà l'eseguibile "run.sh" replicandone i compiti e la gestione del progetto.
 
 
@@ -86,28 +95,7 @@ Inside the firstloop, the instructions "h1.FillRandom("f1", nRndmEvts)" and "h2.
 
 A second loop iterates through all cells (or bins) of the image, where "nh" represents the number of rows and "nw" represents the number of columns of the image. This loop traverses through each row and column of the image, allowing access and manipulation of each individual bin of the two-dimensional histogram. An index "m" is calculated for each bin, representing the position of the bin in the two-dimensional array x1 and x2. This is done by multiplying the row index by the number of columns and adding the column index. This index "m" is used to access the vectors x1 and x2, which contain the image data. For each bin of the image, random Gaussian noise is added using the function "gRandom->Gaus(0, pixelNoise)", which generates a random number distributed according to a Gaussian distribution with mean 0 and standard deviation "pixelNoise". This noise is added to the value of the bin obtained from the respective histograms h1 and h2, resulting in image data with added noise.
 
-
-### Some comments about dimension of images
-The code has been tested on the default dataset but adapted to cover a large scenario. Regarding the analysis conducted in Python, two preprocessing strategies are explored before training: with PCA or without PCA. The idea is that models could be either 1D or 2D, specifically in reference to Convolutional Neural Networks (CNN) using Keras-TensorFlow and Torch, as well as Deep Neural Networks (DNN). This depends on the dimensions of the dataset because, obviously, if we have 2x2 images, PCA will not be applied.
-
-A threshold is set for the image dimensions, such as 10x10 or any combination AxB where both A and B are less than 10 or their product is less than 100. If the product of the image's width and height exceeds 100, Principal Component Analysis (PCA) will be applied to enable training with 1D models. Otherwise, a 2D model is considered. Additionally, some limitations are imposed on the dimensions, as follows:
-
-- A and/or B cannot individually exceed 20.
-- A and B must be integers.
-- A and/or B cannot be less than 8.
-
-### Some comments about dimension of dataset !!!!!!PENDING
-
-The dataset has been tested using 25'000 images for the signal and 100'000 for the background, producing consistent results with relatively low training time. Therefore, this value is considered as a reference (the results are presented in the corresponding section.). 
-
-'''CONSIGLIARE DIMENSIONI DATASET'''
-
-Additionally, the dataset has been tested with 2 million and 1 million images, and the results obtained were practically compatible with those observed using a dataset of 200'000 images. Therefore, if a dataset larger than 200'000 images is provided, a dataset of 200'000 images (100'000 for signal and 100'000 for background) will be randomly selected, and the models will be trained using this dataset. 
-
-This ensures consistency and reliability in the results obtained from the training process.
-
-
-## TMVA.C
+## TMVA.C ---vedere forma finale-----
 
 ### Preparing the environment
 Questo codice è un esempio di utilizzo di TMVA (Toolkit for Multivariate Analysis) per la classificazione utilizzando una CNN, una DNN e un BDT. Viene definita una funzione denominata "TMVA" che prende come input il numero di eventi "nevts" e "opt" per la scelta dei metodi da usare per la classificazione. Successivamente viene estratta la dimensione delle immagini di input dal nome del file e così anche il numero di eventi. Vengono impostate le opzioni di utilizzo dei vari metodi TMVA, verificando se sono disponibili le versioni CPU o GPU. Se è abilitato l'uso di OpenMP, viene impostato il numero di thread a 4 e viene disabilitato il multithreading di OpenBLAS per evitare conflitti.
@@ -159,9 +147,9 @@ This Python script is designed to perform a series of training and evaluation op
 ### 1) DEPENDENCIES
 The code relies on multiple Python libraries, including os, tensorflow, numpy, pandas, torch, matplotlib.pyplot, and time. Additionally, it incorporates functions defined in separate Python files, organized within specific directories: "Evaluation", "Models", and "DataPreparation". 
 - Within the "Evaluation" directory, there are Python files such as "PredictionNN", "TrainTorch", "PredictionBDT", and "Table", each containing multiple functions. These functions handle tasks related to model prediction, PyTorch training, BDT prediction, and result tabulation, respectively.
-- In the "Models" directory, there are individual Python files for different machine learning models, including "model_keras_noPCA", "model_keras_PCA", "model_DNN", "model_DNN_PCA", "model_Torch_noPCA", "model_Torch_PCA2, and "model_BDT".
-- The "DataPreparation" directory contains Python files responsible for various data preprocessing tasks. These files include "Data_Preparation" (function: load_and_normalize_images, create_features_labels), "shuffle" (function: apply_shuffle), and "PCA" (functions: find_optimal_num_components, apply_pca), "Preparing_Dataset"(functions: Control_PCA) each containing functions for data loading and preprocessing, reshaping, shuffling, and Principal Component Analysis (PCA), respectively.
-
+- In the "Models" directory, there are individual Python files for different machine learning models, including "model_keras_PCA", "model_DNN_PCA", "model_Torch_PCA", and "model_BDT".
+- The "DataPreparation" directory contains Python files responsible for various data preprocessing tasks. These files include "Data_Preparation" (function: load_and_normalize_images, create_features_labels and apply_shuffle), "PCA" (functions: find_optimal_num_components, apply_pca), "Preparing_Dataset"(functions: Control_PCA). Each module contains functions for data loading and preprocessing, reshaping, shuffling, calculating Principal Component Analysis (PCA), and applying PCA directly to a dataset, depending on the ML algorithm in question.
+- 
 ### 2) DATA LOADING & NORMALIZATION
 - _Extraction Features_: The code extracts several variables from the file names: the number of events, stored as event_number, and the height and width of the images, stored as height and width, respectively. These variables serve as inputs for subsequent steps in the code.
 - _File Path and Data Loading_: This functionality is implemented using the "load_and_normalize_images" function. The code takes two inputs: the folder path containing the images and the file name. It utilizes Uproot to open the specified file and loads the data for both signal and background images.
@@ -175,16 +163,16 @@ In this code section, we prepare the data for machine learning tasks by converti
 
 ### 4) PREPARING DATASET: Principal Component Analysis (PCA)
 The dataset preparation is handled by the "Control_PCA" function, which takes features (X), labels (y), image width, and height as inputs and performs the following tasks:
-- If the product of the image width and height is greater than or equal to 144, indicating a large-dimensional dataset, PCA is applied. This is done by calling the "find_optimal_num_components" and "apply_pca" functions from "PCA.py". Additionally, the "apply_shuffle" function from "shuffle.py" is called to shuffle the data.
+- In the event that the selected model is one of the DNN, CNN with Torch or TensorFlow-Keras, the code will perform PCA on the dataset. This is achieved by invoking the "find_optimal_num_components" and "apply_pca" functions from "PCA.py" and additionally calling the "apply_shuffle" function from "Data_Preparation.py" to shuffle the data.
     - The "_find_optimal_num_components_" function calculates the optimal number of principal components required to explain a specified percentage (95%) of the total variance in the dataset. It achieves this by fitting a PCA model to the normalized data and computing the cumulative explained variance ratio to determine the number of components needed.
     - The "_apply_pca_" function applies PCA to the normalized data with the specified number of components (stored in the variable "num_components"). It returns the transformed data after dimensionality reduction.
     - The "_apply_shuffle_" function shuffles the data to introduce randomness, which helps prevent model overfitting and ensures robustness. It shuffles the data while maintaining the correspondence between features and labels.
+- If the model is instead BDT, the X and y datasets are left unaltered and recalled as X_new.
 
-
-The function returns the variables "i", "X_shuffled", "y_shuffled", and "n_principal_components". The variable "i" is necessary to distinguish between the case where PCA is applied and where it is not, while "n_principal_components" serves as input for 1D models.
+The function returns the variables "X_new", "y_new", and "n_principal_components". The code is initiated at the outset of each model.
 
 ### 4) MODEL CHOICE
-The user is prompted to choose which model to start with. The logic behind this is as follows: all four models can be experimented with, but once a model is chosen, it cannot be retried in subsequent prompts. Additionally, pressing button number 5 will display a ROC curve comparing all the executed models. If only one model has been executed, only one ROC curve will be displayed. However, if all four models have been executed, then four ROC curves will be shown. The button 5 also acts as an "exit" button, allowing the user to terminate the program. The dataset is split into training and test sets, and the model is trained and evaluated for each model, except for PyTorch, where the data is first converted into tensors before training and evaluation. After that, the four models are defined within the if statement that manages the two scenarios: defining the model with PCA or without PCA. 
+The user is prompted to choose which model to start with. The logic behind this is as follows: all four models can be experimented with, but once a model is chosen, it cannot be retried in subsequent prompts. Additionally, pressing button number 5 will display a ROC curve comparing all the executed models. If only one model has been executed, only one ROC curve will be displayed. However, if all four models have been executed, then four ROC curves will be shown. The button 5 also acts as an "exit" button, allowing the user to terminate the program. The dataset is split into training and test sets, and the model is trained and evaluated for each model, except for PyTorch, where the data is first converted into tensors before training and evaluation. After that, the four models are defined. 
 
 For the PyTorch-based model, we utilize the `trained_model` function to train the model, monitoring the time taken for training. Subsequently, we evaluate the model's performance on the test set using the `test_eval` function and generate predictions to compute metrics such as precision, F1 score, and accuracy. Finally, we visualize the ROC curve and training curves. Instead, for the Keras-based models (DNN and CNN), we train the model using Keras's `fit` method, monitoring the time taken for training. We then evaluate the model's performance on the test set and compute evaluation metrics, printing the ROC curve and training curves. Lastly, for the XGBoost-based model (BDT), we train the model using the `BDT_eval` function, evaluate its performance, and generate predictions to calculate evaluation metrics. Subsequently, we print the ROC curve and training curves. After each training and evaluation process of the models, parameters such as "f1", "accuracy", "precision", and "training time" are calculated and printed on a table. This table is updated each time with the results obtained from each model through the "table.py" module. Additionally, when button 5 is pressed, ROC curves of the trained models are generated and plotted.
 
@@ -217,14 +205,11 @@ The function iterates through the model results in the "model_results" dictionar
 
 
 
-"UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
-  super().__init__(activity_regularizer=activity_regularizer, **kwargs)" __pendente__
 
 
 
 
-
-## Script.sh
+## Script.sh ---vedere forma finale-----
 - _Project Cleanup_: Removes directories from previous runs, including "ROOT/images", "Python_code/images", "Python_code/plot_results", and all "pycache" folders within "Python_code" and its subdirectories. This task is handled by the "generate_delete_command" function
 - _ROOT and Python Verification_: Checks for the presence of ROOT and Python on the computer and ensures their compatibility with the tested code version. If Python and/or ROOT are not present, or if their versions are incompatible, the dockerfile is executed. Additionally, it verifies the presence and version of pip for potential Python library installation. This code is executed by the "check_python", "check_root_version", and "check_pip" functions.
 - _Library Compatibility Check and Update_: Asks the user if they want to verify the presence and compatibility of necessary libraries. If the user chooses not to verify, a message displaying the versions used is printed to the terminal. If the user opts for verification, missing libraries are installed if desired, otherwise the user is prompted to use the dockerfile. If libraries are present but outdated, they are updated to the tested version. If they are more recent than the tested version, they are adjusted. Both actions are performed only if the user desires; otherwise, the code continues its execution, although consequences may be unknown. This code is executed by the "update_python_libraries" function.
@@ -232,6 +217,8 @@ The function iterates through the model results in the "model_results" dictionar
 - _Copying Dataset_:The "images" folder containing the dataset is copied and moved to the "CNN_python" and "TMVA_ML" directories. This code is executed by "move_images_folders" function.
 -  _File Presence Verification_: Verifies the presence of the file in various subdirectories.This code is executed by "check_root_file" function. 
 -  _Training Environment Selection_: Asks the user to choose whether to start training with ROOT or Python. Then, the user can decide if they want to experiment with the other file as well. This is managed in the main script through keyboard commands.
+
+---vedere forma finale-----
 
 # How to run
 
