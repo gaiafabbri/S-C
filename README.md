@@ -1,6 +1,5 @@
 # S-C Project description
-The project compares machine learning techniques for classifying signal and background images, utilizing two main approaches: one based on the TMVA (Toolkit for Multi-Variate Analysis) packages and the other on Python frameworks such as TensorFlow-Keras, PyTorch, and XGBoost for BDT classification. In particular, the comparison includes CNN, DNN, and BDT algorithms. For TMVA, these algorithms are employed directly, while in Python, CNN is implemented using both Keras-TensorFlow and PyTorch, BDT uses XGBoost classifier, and DNN classification is based on Keras-TensorFlow methods. The models are evaluated based on precision, accuracy, F1-score, and ROC curve.
-
+The project compares machine learning techniques for classifying signal and background images, utilizing two main approaches: one based on the TMVA (Toolkit for Multi-Variate Analysis) packages and the other on Python frameworks such as TensorFlow-Keras, PyTorch, and XGBoost for BDT classification. In particular, the comparison includes Convolutional Neural Network (CNN), Deep Neural Network (DNN), and Boosted Decision Trees (BDT) algorithms. For TMVA, these algorithms are employed directly, while in Python, CNN is implemented using both Keras-TensorFlow and PyTorch, BDT uses XGBoost classifier, and DNN classification is based on Keras-TensorFlow methods. The models are evaluated based on precision, accuracy, F1-score, and ROC curve.
 
 The results are obtained using a dataset of 16x16 images, containing 100,000 images each for signal and background (totaling 200,000 images). This dataset is generated with parameters such as: 100,000 events (n), image height and width of 16 bins each (nh = nw = 16), and each bin is filled with 10,000 events (nRndmEvts). The signal and background distributions have a 5% difference in standard deviation (delta_sigma), and Gaussian noise of 5 is added to each bin of the signal (pixelNoise). Within each bin, data are generated using Gaussian distributions centered on the values obtained from the fits of two functions, with additional Gaussian noise.
 
@@ -8,15 +7,27 @@ In Python, the dataset undergoes normalization of pixel data to a range of 0 to 
 ![Comparison_among_models_100000_16x16](https://github.com/gaiafabbri/S-C/assets/133896928/f07ba211-bb44-4383-aafb-3172c9b1635c)
 
 
-For TMVA, the dataset is normalized using NormMode=NumEvents (average weight of 1 per event, independently for signal and background, eventually coud be done with "EqualNumEvents"), and no transformations are applied to the data. The models are trained accordingly. Results are visualized to compare the performance of different algorithms. The results of the comparison among various machine learning techniques are presented below. 
+![arturo](https://github.com/gaiafabbri/S-C/assets/133896928/fe4193e5-8c68-44ee-ab28-5d7b722e5f24)
+
+The majopr aim of this project is to perform a comparison between the TMVA tutorials "CNN_Classification.C" available on the ROOT website at the link: 'https://root.cern/doc/master/TMVA__CNN__Classification_8C.html' and the Python script; the original codes contains also a PyKeras and PyTorch classification. This part was extracted and re-written in order to apply what learned during the lessons and to improve my knoledge about machine learning tecnique. The same method are implemented in the same script: the TMVA coe was only modify and taken as a reference to build the python analysis. The implementation of the method is surely different passing from root to python environment, and this affect also performances (see later the paragraph about the results).
+
+For TMVA, the dataset is normalized using NormMode=NumEvents (average weight of 1 per event, independently for signal and background, eand the models are trained  and tested accordingly to the configuration options. Results are visualized to compare the performance of different algorithms. The results of the comparison among various machine learning techniques are presented below. 
 
 ##METTERE IMMAGINE QUI!!!!####
+
+##Principal Component Analysis description
+
+Principal Component Analysis is used for both the TMVA and the Python analysis: it consists of a data transformation aimed at reducing the components of each image. To be more precise, each image is composed of 256 components, but not all of them are relevant for classification; the PCA transformation reduces the number of components in each image by finding the directions along which the features show the greatest variations. It helps to reduce the complexity of the data and at the same time improves the performance of the model; it is usually applied to high resolution images and it is also useful to avoid correlations between variables: the CNN classification seems to be more effective when the variables are not correlated. In the TMVA script, the PCA is entered directly by setting "Transformations=P" in the Factory object; in the Python analysis, the PCA is implemented in both the Keras and PyTorch models for the CNN, which requires more complex model definitions; moreover, these two models require a complex shape of the data, two-dimensional for the former and tensors for the latter. PCA transforms this shape into a one-dimensional array, which is easier to manage. 
+
+CNN is a classification tecnhique very suitable for images or grid data, but it is specific and the model is difficult to be build. On the contrary, DNN and BDT are simpler but more robust models with a one-dimensional input: the PCA is not applied to BDT since it is shows good performances instead and so it is chosen as a reference; DNN and CNN intead shows a steep increase in performance after PCA implementation, and they are alsd faster.
+The BDT and DNN models are more generic in their application, and their advantages are flexibility and ability to recognise patterns for the former, easy interpretation and robustness for the latter. The DNN are made up of different layers of artificial neurons, while the BDT is based on a decision tree, trying to correct errors made by the previous tree, continuing the training in this way.
 
 For further details and explanations regarding the code implementation, please refer to the specific section.
 
 
 # Comments on results obtained
-
+For the TMVA analysis, the most performing model seems to be the CNN, followed immediately by the DNN; the BDT semms a little worst in classification. The ROC-integer for each model is respectively 0.923, 0.919 and 0.804, with the CNN which shows also the better signal efficiency (0.925, 0,923 and 0.759 for the 30% of background, respectively).
+RUNNARE PYTHON E VEDERE COME VIENE
 
 
 
@@ -27,7 +38,7 @@ The project structure includes:
 
 - A folder named "__ROOT_Gen__" that holds a file named "Generation.C". This file is responsible for generating the dataset of images which are saved into "images" subfolder to be used. For more details on dataset generation, refer to the dataset section.
 - Another folder named "__Python_code__", which encompasses several subfolders and generates an additional folder post-code execution: "plot_results" which aids in visualizing training parameters alongside the Receiver Operating Characteristic (ROC) curve. This curve illustrates signal efficiency versus background rejection for each model. The "plot_results" folder also contains a comparative visualization of ROC curves and a table showcasing performance metrics such as f1 score, accuracy, precision, and training time across different models.
-    - There's "_Program_Start.py_" which serves as the main execution script for machine learning methods. These methods include Convolutional Neural Networks (CNN) implemented with both Torch and TensorFlow-Keras, as well as Boosted Decision Trees (BDT) and Deep Neural Networks (DNN) with Keras. The script acts as an interface with the user, orchestrating functions imported from Python scripts in the subfolders to create a unified training file according to user-selected models. Detailed explanations are provided within the code comments.
+    - There's "_Program_Start.py_" which serves as the main execution script for machine learning methods. These methods include CNN implemented with both Torch and TensorFlow-Keras, as well as BDT and DNN with Keras. The script acts as an interface with the user, orchestrating functions imported from Python scripts in the subfolders to create a unified training file according to user-selected models. Detailed explanations are provided within the code comments.
     - The "_DataPreparation_" subfolder houses scripts for data preparation, including:
         - "Data_Preparation.py" for loading data into arrays and subsequent normalization.
         - "PCA.py" for data preparation when training involves numpy arrays (1D).
@@ -66,25 +77,18 @@ This project was tested on macOS [Versione] Sonoma (M2 chip) with:
   - Xgboost
   - Uproot
 
-# Referenza
-Il progetto si è basato su uno dei tutorials di TMVA nella pagina web di ROOT, al seguente link: 'https://root.cern/doc/master/TMVA__CNN__Classification_8C.html'. Il codice originale è stato modificato (guardare paragrafo "Confronto rispetto alla referenza") con lo scopo di implementare quanto visto a lezione, e renderlo usabile per utenti sprovvisti di ROOT e/o Python ma in possesso di Docker.
-
-
-# Confronto rispetto alla referenza
-
-
-# Spiegazione Codice
+# Script description
 This section will examine the codes in detail, elucidating their operational characteristics. The aim is to provide a comprehensive analysis of their functionalities, elucidating each step to comprehensively understand what they do and how they accomplish it. 
 
 ## Gen_data.C
-The dataset generation process utilizes the Generation.C module within the ROOT folder through the function "Generation". It prompts the user to choose between using a default file generated with dimensions 16x16 and 100,000 events for signal and background, or generating a custom dataset. In the latter case, the user has the freedom to define the dataset dimensions and image format, even non-square ones, with certain constraints.
+The dataset generation process utilizes the Generation.C module within the ROOT folder through the function "Generation". It prompts the user to choose between using a default file generated with dimensions 16x16 and 100,000 events for signal and background, or generating a custom dataset. In the latter case, the user has the freedom to define the dataset dimensions and image format, even non-square ones, with certain constraints. It is necessary to specify that the code was tested woth the default configuration, so we expect differen performances if the dataset is changed.
 
-The "Generation" function requires three parameters: the number of images to generate ("n"), the height ("nh"), and the width ("nw") of the images. It defines a two-dimensional Gaussian distribution for both the signal and background using the ROOT TF2 class. The parameter "nRndmEvts" determines the number of events used to fill each image, representing the number of random events sampled from the signal and background distributions to create a single image example. A higher value of "nRndmEvts" can lead to more defined and realistic images but requires more computational resources to generate the data. Therefore, it is set to 10,000 (non-modifiable). The parameter "delta_sigma" represents the percentage difference in standard deviation (sigma) between the signal and background distributions. A higher value increases the difference between the widths of the background and signal distributions, making them easier to distinguish. It is also set to 5% and is non-modifiable. Random noise is added to the signal, linked to the variable "pixelNoise", representing the level of noise added to each pixel of the generated image. It measures the dispersion or random variation of pixel values.
+The "Generation" function requires three parameters: the number of images to generate ("n"), the height ("nh"), and the width ("nw") of the images. It defines a two-dimensional Gaussian distribution for both the signal and background using the ROOT TF2 class. The parameter "nRndmEvts" determines the number of events used to fill each image, representing the number of random events sampled from the signal and background distributions to create a single image example. A higher value of "nRndmEvts" can lead to more defined and realistic images but requires more computational resources to generate the data. Therefore, it is set to 10,000 (non-modifiable). The parameter "delta_sigma" represents the percentage difference in standard deviation (sigma) between the signal and background distributions. A higher value increases the difference between the widths of the background and signal distributions, making them easier to be distinguished. It is also set to 5% and is non-modifiable. Random noise is added to the signal, linked to the variable "pixelNoise", representing the level of noise added to each pixel of the generated image. It measures the dispersion or random variation of pixel values.
 
 The variables "sX1", "sY1", "sX2", "sY2" represent the sigma values along the x and y axes for the first and second Gaussian distributions, respectively, where "sX2" is increased by 5% compared to "sX1", and "sY2" is decreased by 5% compared to "sY1". Two TH2D histograms are created using ROOT to store the data, along with two TF2 functions representing the Gaussian distributions. Two TTree trees are then created: one for signal data (sig_tree) and one for background data (bkg_tree). Branches of the trees ("vars") are defined to contain the image data, using a pointer to a float vector to store the data.
 
 
-he parameters for the two functions, "f1.SetParameters(1, 5, sX1, 5, sY1)" and "f2.SetParameters(1, 5, sX2, 5, sY2)", are defined with the following parameters, in order:
+ The two functions, "f1.SetParameters(1, 5, sX1, 5, sY1)" and "f2.SetParameters(1, 5, sX2, 5, sY2)" are used to set the distribution of data within the images and are defined with the following parameters, in order:
 - Maximum height of the Gaussian
 - Mean position along the x-axis
 - Standard deviation along the x-axis
@@ -95,16 +99,16 @@ Inside the firstloop, the instructions "h1.FillRandom("f1", nRndmEvts)" and "h2.
 
 A second loop iterates through all cells (or bins) of the image, where "nh" represents the number of rows and "nw" represents the number of columns of the image. This loop traverses through each row and column of the image, allowing access and manipulation of each individual bin of the two-dimensional histogram. An index "m" is calculated for each bin, representing the position of the bin in the two-dimensional array x1 and x2. This is done by multiplying the row index by the number of columns and adding the column index. This index "m" is used to access the vectors x1 and x2, which contain the image data. For each bin of the image, random Gaussian noise is added using the function "gRandom->Gaus(0, pixelNoise)", which generates a random number distributed according to a Gaussian distribution with mean 0 and standard deviation "pixelNoise". This noise is added to the value of the bin obtained from the respective histograms h1 and h2, resulting in image data with added noise.
 
-## TMVA.C ---vedere forma finale-----
+## TMVA_Classification.C ---vedere forma finale-----
 
-### Preparing the environment
-Questo codice è un esempio di utilizzo di TMVA (Toolkit for Multivariate Analysis) per la classificazione utilizzando una CNN, una DNN e un BDT. Viene definita una funzione denominata "TMVA" che prende come input il numero di eventi "nevts" e "opt" per la scelta dei metodi da usare per la classificazione. Successivamente viene estratta la dimensione delle immagini di input dal nome del file e così anche il numero di eventi. Vengono impostate le opzioni di utilizzo dei vari metodi TMVA, verificando se sono disponibili le versioni CPU o GPU. Se è abilitato l'uso di OpenMP, viene impostato il numero di thread a 4 e viene disabilitato il multithreading di OpenBLAS per evitare conflitti.
+### Preparing the environment and the dataset
+This code is an application which uses the TMVA (Toolkit for Multivariate Analysis) environement to classify signal and background images implementing a CNN, a DNN and a BDT TMVA methods; the analysis is performed througout the function TMVA_Classification()', which takes as input the number of 'nevts' and the 'opt' vector containign the possible methods used for classification. 
 
-### Preparing dataset
-Questa parte del codice si occupa di preparare i dati per l'addestramento e il test dei modelli di classificazione. Ecco una spiegazione più dettagliata. Viene creato un oggetto TMVA::DataLoader per gestire i dati di input. Vengono ottenuti i puntatori ai TTree contenenti gli eventi di segnale e di background dal file di input utilizzando "TFile::Get<TTree>("nome_albero")". Viene calcolato il numero totale di eventi di segnale ("nEventsSig") e di background ("nEventsBkg") presenti nei TTree. I TTree di segnale e di background vengono aggiunti al DataLoader utilizzando "loader.AddSignalTree" e "loader.AddBackgroundTree". Viene aggiunta un'array di variabili di input (nel caso delle immagini, la dimensione dell'array di pixel) al DataLoader utilizzando "loader.AddVariablesArray". Successivamente è possibile impostare pesi individuali per gli eventi di segnale e di background utilizzando "factory->SetSignalWeightExpression" e "factory->SetBackgroundWeightExpression". È possibile applicare tagli aggiuntivi sugli eventi di segnale e di background utilizzando le variabili mycuts e mycutb. Viene definito il numero di eventi di segnale e di background da utilizzare per l'addestramento (80% dei dati) e per il test (20% dei dati). Vengono costruite le opzioni per la preparazione dei dati di addestramento e test, specificando il numero di eventi di segnale e di background da utilizzare e altre opzioni come la modalità di divisione dei dati. Infine, i dati vengono preparati per l'addestramento e il test utilizzando loader.PrepareTrainingAndTestTree.
+The size of the input images and the number of events is then extracted from the file name; the analysis is performed in multithread option, with n_threads=4: if the latter is not available the DNN method cannot be run. A file root containing the output is created and the analysis starts with the creation of a factory object, containing the configuration options: in particular, the data undergo PCA transformation ("Transformations=P"); other options include the verbose flag the verbose flag, the flag for coloured screen output (Colour=True) and the flag for output visualisation ("!Silent") 
+The training dataset is loaded using the DataLoader object, which is then used to specify the input variables: the AddVariable method takes as arguments the name as a string and the number of elements in the array, and the input variable is an array of 256 variables; there are no spectator variables. Signal and background events are extracted from two different trees and the same weight is given to both classes; individual weights can be assigned to two classes. The number of events selected for training is the 80% of the total entries of the trees, both for signal and background; at this point the dataset is ready for training.
 
 ### Choice and Training of TMVA methods 
-The initial segment of the code is dedicated to configuring TMVA methods for training classification models (BDT, CNN, and DNN with TMVA). Subsequently, the following actions are performed:
+The following segment of the code is dedicated to configuring TMVA methods for training classification models (BDT, CNN, and DNN with TMVA). In TMVA, all methods are trained, tested and evaluate together as follows:
 - "factory.TrainAllMethods()": This method trains all the specified methods (in this case, BDT, DNN, and CNN) using the previously prepared training data.
 - "factory.TestAllMethods()": It tests all the trained methods using the pre-prepared test data.
 - "factory.EvaluateAllMethods()": This step evaluates the performance of all the trained methods using appropriate metrics.
@@ -219,6 +223,15 @@ The function iterates through the model results in the "model_results" dictionar
 -  _Training Environment Selection_: Asks the user to choose whether to start training with ROOT or Python. Then, the user can decide if they want to experiment with the other file as well. This is managed in the main script through keyboard commands.
 
 ---vedere forma finale-----
+
+## Analysis.py
+This code implements some function to analyse and visualize the input data; several functions are implemented:
+- _plot_images(num_images_to_plot, signal_data, background_data)_: takes as argument the number of images that the users wants to plot, the signal and background data; it is useful to visualize some images of the dataset, comparing signal and background
+- _pixel_intensity_distribution (sgn_mean,bkg_mean)_: it takes as arguments two arrays containing the mean pixel intensities; this value are used to obtrain the histograms of the intensity distribution. It is useful to understand how pixel are distributed within the images and to look for differences among signal and background data
+- _plot_cluster_histogram(cluster1, cluster2)_: it shows a histogram of clusters coming from the KMeans clustering algorithm; it takes as arguments two arrays containign the label of the cluster for each image. It is useful to look for similarities within the data that creates some substractures, called clusters; within clusters, data are considered homogeneous according to a metric defined by the clustering algorithm, in this case the euclidean distance amogn points. In particular, it is helpful to distinguish if the two classes are grouped differently and to simplify data analysis and understanding
+- _plot_cluster_centers(centers1, centers2)_: it takes as arguments the centroids for signal and background clusters, obtained by the clustering algorithm as the mean representation of points within a cluster; it is helpful to focus on the principal features of data
+- _plot_pixel_distribution(signal_image, background_image)_: this function shows the distribution (the histogram) of pixel within the classes, together with the pixel correltation; it looks for pixel correlation and helps to understand differences in the intensity of images
+- _plot_intensity_profile(image_data1,image_data2, axis='row')_: it takes as argument the signal and background arrays; it is the visualization of the intensity profile of images along rows or columns, looking for differnces between signal and background alogn different directions
 
 # How to run
 

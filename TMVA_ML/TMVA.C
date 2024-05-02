@@ -1,25 +1,42 @@
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <map>
+
+#include "TMVA/TMVAGui.h"
+#include "TMVA/DataLoader.h"
+#include "TMVA/Factory.h"
+#include "TMVA/Tools.h"
+
+#include "TFile.h"
+#include "TTree.h"
+#include "TString.h"
+#include "TObjString.h"
+#include "TSystem.h"
+#include "TROOT.h"
+#include "TChain.h"
 /***
  
     # TMVA Classification Example Using a Convolutional Neural Network
  
-
- 
 **/
  
+//-----------------------------------------------------------------------------------
 /// @brief Run the TMVA CNN Classification example
 /// @param nevts : number of signal/background events. Use by default a low value (1000)
 ///                but increase to at least 5000 to get a good result
 /// @param opt :   vector of bool with method used (default all on if available). The order is:
-///                   - TMVA CNN
-///                   - Keras CNN
+///                   - TMVA CN
 ///                   - TMVA DNN
 ///                   - TMVA BDT
-///                   - PyTorch CNN
-void TMVA_CNN_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1, 1, 1})
+//-----------------------------------------------------------------------------------
+
+void TMVA_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1, 1, 1})
 {
  
+    //Accessing the input file, printin an error message if the file is not found
    int imgSize = 16 * 16;
-   TString inputFileName = "images_data_16x16.root";
+   TString inputFileName = "images_data_16x16_10000.root";
  
    bool fileExist = !gSystem->AccessPathName(inputFileName);
  
@@ -28,12 +45,19 @@ void TMVA_CNN_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1,
         std::cout << "error: the file is not present" << std::endl;
     }
 
- 
+//-----------------------------------------------------------------------------------
+ //initialization of boolean variables checking if the vector opt contains the methods for classification
+// for each variable, the size of the vector is checked, and it must contain one element for the first variable, two elements for the second and so on
    bool useTMVACNN = (opt.size() > 0) ? opt[0] : false;
    bool useKerasCNN = (opt.size() > 1) ? opt[1] : false;
    bool useTMVADNN = (opt.size() > 2) ? opt[2] : false;
    bool useTMVABDT = (opt.size() > 3) ? opt[3] : false;
    bool usePyTorchCNN = (opt.size() > 4) ? opt[4] : false;
+//-----------------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------------
+//running with multi-thread option or with GPU
 #ifndef R__HAS_TMVACPU
 #ifndef R__HAS_TMVAGPU
    Warning("TMVA_CNN_Classification",
@@ -46,7 +70,7 @@ void TMVA_CNN_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1,
  
 #ifdef R__USE_IMT
    int num_threads = 4;  // use by default 4 threads if value is not set before
-   // switch off MT in OpenBLAS to avoid conflict with tbb
+   // it is a variable to switch off multi-thread in OpenBLAS to avoid conflict with Intel Threading Building Blocks(tbb)
    gSystem->Setenv("OMP_NUM_THREADS", "1");
  
    // do enable MT running
@@ -57,76 +81,56 @@ void TMVA_CNN_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1,
  
    TMVA::Tools::Instance();
  
-    std::cout << "spurio "<< std::endl;
- 
+    //printing the number of threads
    std::cout << "Running with nthreads  = " << ROOT::GetThreadPoolSize() << std::endl;
-    
-    std::cout << "spurio "<< std::endl;
  
-/*#ifdef R__HAS_PYMVA
-    std::cout << "spurio "<< std::endl;
-   gSystem->Setenv("KERAS_BACKEND", "tensorflow");
-   // for using Keras
-   TMVA::PyMethodBase::PyInitialize();
-#else
-   useKerasCNN = false;
-   usePyTorchCNN = false;
-#endif*/
-    std::cout << "spurio "<< std::endl;
- 
+//creating the output root file
+    TString outfileName("TMVA_CNN_ClassificationOutput.root");
    TFile *outputFile = nullptr;
    if (writeOutputFile)
-      outputFile = TFile::Open("TMVA_CNN_ClassificationOutput.root", "RECREATE");
+      outputFile = TFile::Open(outfileName, "RECREATE");
+//-----------------------------------------------------------------------------------
  
+    
+//-----------------------------------------------------------------------------------
    /***
        ## Create TMVA Factory
  
-    Create the Factory class. Later you can choose the methods
-    whose performance you'd like to investigate.
+Create the Factory class. Later you can choose the methods whose performance you'd like to investigate.
+The factory is the major TMVA object you have to interact with. Here is the list of parameters you need to pass
  
-    The factory is the major TMVA object you have to interact with. Here is the list of parameters you need to pass
- 
-    - The first argument is the base of the name of all the output
-    weight files in the directory weight/ that will be created with the
-    method parameters
- 
-    - The second argument is the output file for the training results
- 
-    - The third argument is a string option defining some general configuration for the TMVA session.
-      For example all TMVA output can be suppressed by removing the "!" (not) in front of the "Silent" argument in the
+- The first argument is the base of the name of all the output weight files in the directory weight/ that will be created with the method parameters
+- The second argument is the output file for the training results
+- The third argument is a string option defining some general configuration for the TMVA session. For example all TMVA output can be suppressed by removing the "!" (not) in front of the "Silent" argument in the
    option string
- 
-    - note that we disable any pre-transformation of the input variables and we avoid computing correlations between
+- note that we disable any pre-transformation of the input variables and we avoid computing correlations between
    input variables
+-scatter plot and correlation matrixes for 256 varibales need to much memory and computational efforts to be calculated, so we disable them
    ***/
- 
-   TMVA::Factory factory(
-      "TMVA_CNN_Classification", outputFile,
-      "!V:ROC:!Silent:Color:AnalysisType=Classification:Transformations=None:!Correlations");
- 
+//-----------------------------------------------------------------------------------
+    
+   TMVA::Factory factory( "TMVA_CNN_Classification", outputFile, "!V:ROC:!Silent:Color:AnalysisType=Classification:Transformations=None:!Correlations");
+    
+//-----------------------------------------------------------------------------------
    /***
  
        ## Declare DataLoader(s)
- 
-       The next step is to declare the DataLoader class that deals with input variables
- 
-       Define the input variables that shall be used for the MVA training
-       note that you may also use variable expressions, which can be parsed by TTree::Draw( "expression" )]
- 
-       In this case the input data consists of an image of 16x16 pixels. Each single pixel is a branch in a ROOT TTree
+ The next step is to declare the DataLoader class that deals with input variables
+Define the input variables that shall be used for the MVA training note that you may also use variable expressions, which can be parsed by TTree::Draw( "expression" )]
+In this case the input data consists of an image of 16x16 pixels. Each single pixel is a branch in a ROOT TTree
  
    **/
- 
+//-----------------------------------------------------------------------------------
+    
    TMVA::DataLoader loader("dataset");
- 
+    
+//-----------------------------------------------------------------------------------
    /***
- 
        ## Setup Dataset(s)
- 
-       Define input data file and signal and background trees
- 
+Define input data file and signal and background trees
    **/
- 
+//-----------------------------------------------------------------------------------
+
    std::unique_ptr<TFile> inputFile{TFile::Open(inputFileName)};
    if (!inputFile) {
       Error("TMVA_CNN_Classification", "Error opening input file %s - exit", inputFileName.Data());
@@ -150,35 +154,30 @@ void TMVA_CNN_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1,
    int nEventsSig = signalTree->GetEntries();
    int nEventsBkg = backgroundTree->GetEntries();
  
-   // global event weights per tree (see below for setting event-wise weights)
+   // global event weights per tree (single event weights can also be set)
    Double_t signalWeight = 1.0;
    Double_t backgroundWeight = 1.0;
  
-   // You can add an arbitrary number of signal or background trees
+   // Adding signal and background tree containing the events
    loader.AddSignalTree(signalTree, signalWeight);
    loader.AddBackgroundTree(backgroundTree, backgroundWeight);
  
-   /// add event variables (image)
-   /// use new method (from ROOT 6.20 to add a variable array for all image data)
+   // add event variables (image): it is an array of 256 variables
+   // use new method (from ROOT 6.20 to add a variable array for all image data)
    loader.AddVariablesArray("vars", imgSize);
- 
-   // Set individual event weights (the variables must exist in the original TTree)
-   //    for signal    : factory->SetSignalWeightExpression    ("weight1*weight2");
-   //    for background: factory->SetBackgroundWeightExpression("weight1*weight2");
-   // loader.SetBackgroundWeightExpression( "weight" );
- 
-   // Apply additional cuts on the signal and background samples (can be different)
-   TCut mycuts = ""; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
-   TCut mycutb = ""; // for example: TCut mycutb = "abs(var1)<0.5";
- 
-   // Tell the factory how to use the training and testing events
+
+   // If you want apply additional cuts on the signal and background samples the followinf must be modified: it is useful in case signal and background events are in the same tree
+   TCut mycuts = "";
+   TCut mycutb = "";
+    
+//-----------------------------------------------------------------------------------
+/// Tell the factory how to use the training and testing events
    //
-   // If no numbers of events are given, half of the events in the tree are used
-   // for training, and the other half for testing:
-   //    loader.PrepareTrainingAndTestTree( mycut, "SplitMode=random:!V" );
-   // It is possible also to specify the number of training and testing events,
-   // note we disable the computation of the correlation matrix of the input variables
- 
+/// -If no numbers of events are given, half of the events in the tree are used for training, and the other half for testing:
+///-nTrain_Signal=0 and nTrain_Background=0 means using all the events for training (and for testing also); specifying the number of events used to train an putting nTestSignal=0 and nTest_Background=0 means using the remaing part of the dataset to test
+///- note we disable the computation of the correlation matrix of the input variables as told before
+//-----------------------------------------------------------------------------------
+    
    int nTrainSig = 0.8 * nEventsSig;
    int nTrainBkg = 0.8 * nEventsBkg;
  
@@ -188,24 +187,25 @@ void TMVA_CNN_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1,
       nTrainSig, nTrainBkg);
  
    loader.PrepareTrainingAndTestTree(mycuts, mycutb, prepareOptions);
- 
+
+//-----------------------------------------------------------------------------------
    /***
  
        DataSetInfo              : [dataset] : Added class "Signal"
        : Add Tree sig_tree of type Signal with 10000 events
        DataSetInfo              : [dataset] : Added class "Background"
        : Add Tree bkg_tree of type Background with 10000 events
- 
- 
- 
    **/
+//-----------------------------------------------------------------------------------
  
+//-----------------------------------------------------------------------------------
    /****
-        # Booking Methods
- 
-        Here we book the TMVA methods. We book a Boosted Decision Tree method (BDT)
- 
+        # Booking Methods:
+-the first argument is the predefined enumerator specifying the classifier
+-the second argument is an user-defined name
+-the third argument is a string containing all the configuration options
    **/
+//-----------------------------------------------------------------------------------
  
    // Boosted Decision Trees
    if (useTMVABDT) {
@@ -213,19 +213,14 @@ void TMVA_CNN_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1,
                          "!V:NTrees=200:MinNodeSize=2.5%:MaxDepth=2:BoostType=AdaBoost:AdaBoostBeta=0.5:"
                          "UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20");
    }
-   /**
- 
-      #### Booking Deep Neural Network
- 
-      Here we book the DNN of TMVA. See the example TMVA_Higgs_Classification.C for a detailed description of the
-   options
- 
-   **/
+//-----------------------------------------------------------------------------------
+
+ //Booking Deep Neural Network
  
    if (useTMVADNN) {
  
       TString layoutString(
-         "Layout=DENSE|100|RELU,BNORM,DENSE|100|RELU,BNORM,DENSE|100|RELU,BNORM,DENSE|100|RELU,DENSE|1|LINEAR");
+         "Layout=DENSE|64|RELU,BNORM,DENSE|64|RELU,BNORM,DENSE|64|RELU,BNORM,DENSE|64|RELU,DENSE|1|LINEAR");// the number of neuron is chosen to maximize the model performance and to not apply a too complex representation of data
  
       // Training strategies
       // one can catenate several training strings with different parameters (e.g. learning rates or regularizations
@@ -240,7 +235,7 @@ void TMVA_CNN_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1,
  
       // Build now the full DNN Option string
  
-      TString dnnOptions("!H:V:ErrorStrategy=CROSSENTROPY:VarTransform=None:"
+      TString dnnOptions("!H:V:ErrorStrategy=CROSSENTROPY:VarTransform=None:CreateMVAPdfs:"
                          "WeightInitialization=XAVIER");
       dnnOptions.Append(":");
       dnnOptions.Append(layoutString);
@@ -248,6 +243,7 @@ void TMVA_CNN_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1,
       dnnOptions.Append(trainingStrategyString);
  
       TString dnnMethodName = "TMVA_DNN_CPU";
+       
 // use GPU if available
 #ifdef R__HAS_TMVAGPU
       dnnOptions += ":Architecture=GPU";
@@ -259,35 +255,30 @@ void TMVA_CNN_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1,
       factory.BookMethod(&loader, TMVA::Types::kDL, dnnMethodName, dnnOptions);
    }
  
+//-----------------------------------------------------------------------------------
    /***
     ### Book Convolutional Neural Network in TMVA
  
     For building a CNN one needs to define
+-  Input Layout :  number of channels (in this case = 1)  | image height | image width
+-  Batch Layout :  batch size | number of channels | image size = (height*width)
+Then one add Convolutional layers and MaxPool layers.
  
-    -  Input Layout :  number of channels (in this case = 1)  | image height | image width
-    -  Batch Layout :  batch size | number of channels | image size = (height*width)
- 
-    Then one add Convolutional layers and MaxPool layers.
- 
-    -  For Convolutional layer the option string has to be:
-       - CONV | number of units | filter height | filter width | stride height | stride width | padding height | paddig
+For Convolutional layer the option string has to be:
+- CONV | number of units | filter height | filter width | stride height | stride width | padding height | paddig
    width | activation function
- 
-       - note in this case we are using a filer 3x3 and padding=1 and stride=1 so we get the output dimension of the
+- note in this case we are using a filer 3x3 and padding=1 and stride=1 so we get the output dimension of the
    conv layer equal to the input
- 
-      - note we use after the first convolutional layer a batch normalization layer. This seems to help significantly the
+- note we use after the first convolutional layer a batch normalization layer. This seems to help significantly the
    convergence
+    
+ For the MaxPool layer:
+- MAXPOOL  | pool height | pool width | stride height | stride width
  
-     - For the MaxPool layer:
-        - MAXPOOL  | pool height | pool width | stride height | stride width
- 
-    The RESHAPE layer is needed to flatten the output before the Dense layer
- 
- 
-    Note that to run the CNN is required to have CPU  or GPU support
- 
+The RESHAPE layer is needed to flatten the output before the Dense layer
+Note that to run the CNN is required to have CPU  or GPU support
    ***/
+//-----------------------------------------------------------------------------------
  
    if (useTMVACNN) {
  
@@ -308,7 +299,7 @@ void TMVA_CNN_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1,
          trainingString1; // + "|" + trainingString2 + "|" + trainingString3; for concatenating more training strings
  
       // Build full CNN Options.
-      TString cnnOptions("!H:V:ErrorStrategy=CROSSENTROPY:VarTransform=None:"
+      TString cnnOptions("!H:V:ErrorStrategy=CROSSENTROPY:VarTransform=None:CreateMVAPdfs:"
                          "WeightInitialization=XAVIER");
  
       cnnOptions.Append(":");
@@ -320,6 +311,7 @@ void TMVA_CNN_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1,
  
       //// New DL (CNN)
       TString cnnMethodName = "TMVA_CNN_CPU";
+       
 // use GPU if available
 #ifdef R__HAS_TMVAGPU
       cnnOptions += ":Architecture=GPU";
@@ -331,82 +323,9 @@ void TMVA_CNN_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1,
  
       factory.BookMethod(&loader, TMVA::Types::kDL, cnnMethodName, cnnOptions);
    }
- 
-   /**
-      ### Book Convolutional Neural Network in Keras using a generated model
- 
-   **/
- /*
-#ifdef R__HAS_PYMVA
-   // The next section uses Python packages, execute it only if PyMVA is available
-   TString tmva_python_exe{TMVA::Python_Executable()};
-   TString python_exe = tmva_python_exe.IsNull() ? "python" : tmva_python_exe;
- 
-   if (useKerasCNN) {
- 
-      Info("TMVA_CNN_Classification", "Building convolutional keras model");
-      // create python script which can be executed
-      // create 2 conv2d layer + maxpool + dense
-      TMacro m;
-      m.AddLine("import tensorflow");
-      m.AddLine("from tensorflow.keras.models import Sequential");
-      m.AddLine("from tensorflow.keras.optimizers import Adam");
-      m.AddLine(
-         "from tensorflow.keras.layers import Input, Dense, Dropout, Flatten, Conv2D, MaxPooling2D, Reshape, BatchNormalization");
-      m.AddLine("");
-      m.AddLine("model = Sequential() ");
-      m.AddLine("model.add(Reshape((16, 16, 1), input_shape = (256, )))");
-      m.AddLine("model.add(Conv2D(10, kernel_size = (3, 3), kernel_initializer = 'glorot_normal',activation = "
-                "'relu', padding = 'same'))");
-      m.AddLine("model.add(BatchNormalization())");
-      m.AddLine("model.add(Conv2D(10, kernel_size = (3, 3), kernel_initializer = 'glorot_normal',activation = "
-                "'relu', padding = 'same'))");
-      // m.AddLine("model.add(BatchNormalization())");
-      m.AddLine("model.add(MaxPooling2D(pool_size = (2, 2), strides = (1,1))) ");
-      m.AddLine("model.add(Flatten())");
-      m.AddLine("model.add(Dense(256, activation = 'relu')) ");
-      m.AddLine("model.add(Dense(2, activation = 'sigmoid')) ");
-      m.AddLine("model.compile(loss = 'binary_crossentropy', optimizer = Adam(learning_rate = 0.001), weighted_metrics = ['accuracy'])");
-      m.AddLine("model.save('model_cnn.h5')");
-      m.AddLine("model.summary()");
- 
-      m.SaveSource("make_cnn_model.py");
-      // execute
-      gSystem->Exec(python_exe + " make_cnn_model.py");
-      if (gSystem->AccessPathName("model_cnn.h5")) {
-         Warning("TMVA_CNN_Classification", "Error creating Keras model file - skip using Keras");
-      } else {
-         // book PyKeras method only if Keras model could be created
-         Info("TMVA_CNN_Classification", "Booking tf.Keras CNN model");
-         factory.BookMethod(
-            &loader, TMVA::Types::kPyKeras, "PyKeras",
-            "H:!V:VarTransform=None:FilenameModel=model_cnn.h5:tf.keras:"
-            "FilenameTrainedModel=trained_model_cnn.h5:NumEpochs=10:BatchSize=100:"
-            "GpuOptions=allow_growth=True"); // needed for RTX NVidia card and to avoid TF allocates all GPU memory
-      }
-   }
- 
-   if (usePyTorchCNN) {
- 
-      Info("TMVA_CNN_Classification", "Using Convolutional PyTorch Model");
-      TString pyTorchFileName = gROOT->GetTutorialDir() + TString("/tmva/PyTorch_Generate_CNN_Model.py");
-      // check that pytorch can be imported and file defining the model and used later when booking the method is
-      // existing
-      if (gSystem->Exec(python_exe + " -c 'import torch'") || gSystem->AccessPathName(pyTorchFileName)) {
-         Warning("TMVA_CNN_Classification", "PyTorch is not installed or model building file is not existing - skip using PyTorch");
-      } else {
-         // book PyTorch method only if PyTorch model could be created
-         Info("TMVA_CNN_Classification", "Booking PyTorch CNN model");
-         TString methodOpt = "H:!V:VarTransform=None:FilenameModel=PyTorchModelCNN.pt:"
-                             "FilenameTrainedModel=PyTorchTrainedModelCNN.pt:NumEpochs=10:BatchSize=100";
-         methodOpt += TString(":UserCode=") + pyTorchFileName;
-         factory.BookMethod(&loader, TMVA::Types::kPyTorch, "PyTorch", methodOpt);
-      }
-   }
-#endif
- */
-    //commentiamo la parte sopra come prova:usiamo solo TMVA
-   ////  ## Train Methods
+//-----------------------------------------------------------------------------------
+   
+   ///  ## Train Methods
  
    factory.TrainAllMethods();
  
@@ -415,13 +334,15 @@ void TMVA_CNN_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1,
    factory.TestAllMethods();
  
    factory.EvaluateAllMethods();
+    // Dopo factory.EvaluateAllMethods();
  
    /// ## Plot ROC Curve
  
-   auto c1 = factory.GetROCCurve(&loader);
-   //c1->Draw();
-    c1->Print("arturo.pdf");
- 
-   // close outputfile to save output file
-   outputFile->Close();
-}
+    auto c1 = factory.GetROCCurve(&loader);
+    c1->Draw();
+     //c1->Print("arturo.pdf");
+  
+    // close outputfile to save output file
+    outputFile->Close();
+    if (!gROOT->IsBatch()) TMVA::TMVAGui( outfileName );
+ }
