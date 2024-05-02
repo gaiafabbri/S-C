@@ -68,11 +68,6 @@ print("Signal images and background images dimension: ", signal_immages_numpy.sh
 # Defining the features and the labels
 X,y=create_features_labels(signal_immages_numpy, background_images_numpy)
 
-'''------------------ PREPARING DATASET ------------------'''
-
-# PCA
-#i, X_shuffled,y_shuffled, n_principal_components = Control_PCA (X, y, width, height)
-
 
 '''------------------ MODEL CHOICE ------------------'''
 
