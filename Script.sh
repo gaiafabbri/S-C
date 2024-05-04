@@ -1,11 +1,14 @@
 #!/bin/bash
 
-# Function to check the ROOT version
+#######################################
+# Function to check the ROOT version #
+#######################################
+
 check_root_version() {
     root_version=$(root-config --version 2>/dev/null)
     if [ $? -eq 0 ]; then
         echo "ROOT version: $root_version"
-        required_version="6.28/06"
+        required_version="6.30.06"
         if [ "$root_version" != "$required_version" ]; then
             echo "Warning: Your ROOT version ($root_version) is not compatible (required: $required_version). Please update or use the Dockerfile."
             exit 1
@@ -16,7 +19,10 @@ check_root_version() {
     fi
 }
 
-# Function to check the presence and version of Python
+####################################
+# Function to check Python version #
+####################################
+
 check_python() {
     echo "Checking Python version:"
     python_version=$(python3 --version 2>&1)
@@ -33,8 +39,13 @@ check_python() {
         exit 1
     fi
 }
-'''
-# Function to update Python libraries
+
+
+############################################
+# Function to update Python libraries     #
+# and ensure compatibility                #
+############################################
+
 update_python_libraries() {
     echo "Checking Python libraries and compatibility:"
     incompatible_libraries=()
@@ -42,28 +53,33 @@ update_python_libraries() {
     check_library() {
         local lib_name=$1
         local required_version=$2
-        local lib_version=$(pip3 show "$lib_name" | grep Version | awk '{print $2}')
+        local lib_version=$(python3 -c "import $lib_name; print($lib_name.__version__)" 2>/dev/null)
 
         if [ $? -eq 0 ]; then
-            if [[ "$lib_version" != "$required_version" ]]; then
+            # Use packaging.version to compare library versions
+            if [ "$(python3 -c "from packaging.version import parse; print(parse('$lib_version') < parse('$required_version'))")" = "True" ]; then
                 incompatible_libraries+=("$lib_name (current version: $lib_version, required version: $required_version)")
+            elif [ "$(python3 -c "from packaging.version import parse; print(parse('$lib_version') > parse('$required_version'))")" = "True" ]; then
+                read -p "You have a newer version of $lib_name ($lib_version) compared to the required one ($required_version). Do you want to update to the required version? (y/n): " update_to_required_version
+                if [ "$update_to_required_version" = "y" ]; then
+                    echo "Updating $lib_name to the required version..."
+                    pip3 install --upgrade $lib_name==$required_version
+                    echo "$lib_name successfully updated to version $required_version!"
+                else
+                    incompatible_libraries+=("$lib_name (current version: $lib_version, required version: $required_version)")
+                fi
             fi
         else
-            while true; do
-                read -p "$lib_name not found. Do you want to install it? (y/n): " install_lib
-                case $install_lib in
-                    [yY]* )
-                        echo "Installing $lib_name..."
-                        pip3 install $lib_name==$required_version
-                        echo "$lib_name successfully installed!"
-                        break;;
-                    [nN]* )
-                        echo "Consider using a Dockerfile to manage the environment."
-                        exit 1;;
-                    * )
-                        echo "Invalid response. Please respond with 'y' or 'n'.";;
-                esac
-            done
+            incompatible_libraries+=("$lib_name (not installed)")
+            read -p "$lib_name not found. Do you want to install it? (y/n): " install_lib
+            if [ "$install_lib" = "y" ]; then
+                echo "Installing $lib_name..."
+                pip3 install $lib_name==$required_version
+                echo "$lib_name successfully installed!"
+            else
+                echo "Consider using a Dockerfile to manage the environment."
+                exit 1
+            fi
         fi
     }
 
@@ -71,39 +87,38 @@ update_python_libraries() {
     check_library "numpy" "1.26.4"
     check_library "tensorflow" "2.16.1"
     check_library "keras" "3.1.1"
-    check_library "torch" "2.2.2+cu121"
+    check_library "torch" "2.2.2"
     check_library "uproot" "5.3.2"
 
     if [ ${#incompatible_libraries[@]} -gt 0 ]; then
         echo "The following libraries are either incompatible with the required versions or not installed:"
         printf '%s\n' "${incompatible_libraries[@]}"
-        while true; do
-            read -p "Do you want to update these libraries? (y/n): " update_libraries
-            case $update_libraries in
-                [yY]* )
-                    echo "Updating libraries..."
-                    for lib_info in "${incompatible_libraries[@]}"; do
-                        lib_name=$(echo "$lib_info" | cut -d' ' -f1)
-                        echo "Updating $lib_name..."
-                        pip3 install --upgrade $lib_name==$required_version
-                        echo "$lib_name successfully updated!"
-                    done
-                    break;;
-                [nN]* )
-                    echo "Continuing without updating libraries."
-                    break;;
-                * )
-                    echo "Invalid response. Please respond with 'y' or 'n'.";;
-            esac
-        done
+        read -p "Do you want to update these libraries? (y/n): " update_libraries
+        if [ "$update_libraries" = "y" ]; then
+            echo "Updating libraries..."
+            for lib_info in "${incompatible_libraries[@]}"; do
+                lib_name=$(echo "$lib_info" | cut -d' ' -f1)
+                echo "Updating $lib_name..."
+                pip3 install --upgrade $lib_name
+                echo "$lib_name successfully updated!"
+            done
+        else
+            echo "Continuing without updating libraries."
+        fi
     else
         echo "All libraries are compatible."
     fi
 }
-'''
 
 
-# Function to check the pip version
+
+
+
+
+##################################
+# Function to check the pip version #
+##################################
+
 check_pip() {
     echo "Checking pip version:"
     pip_version=$(pip3 --version | cut -d ' ' -f 2)
@@ -134,7 +149,10 @@ check_pip() {
 }
 
 
-# Function to check the presence of ROOT files
+##############################################
+# Function to check the presence of ROOT files #
+##############################################
+
 check_root_file() {
     local tmva_ml_folder="TMVA_ML/images"
     local Python_code_folder="Python_code/images"
@@ -161,20 +179,30 @@ check_root_file() {
 }
 
 
-# Function to generate delete command
+#################################################
+# Function to generate delete command           #
+#################################################
+
 generate_delete_command() {
     local folder_path="$1"
     eval "rm -rf \"$folder_path\""
 }
 
 
-# Dataset Generation
+##################################
+# Function to generate ROOT files #
+##################################
+
 Gen_files(){
     root -l -q "ROOT_Gen/Generation_Images.C(10000, 16, 16)"
 }
 
 
-# Function to delete all '__pycache__' folders from subdirectories of a folder
+####################################################
+# Function to delete all '__pycache__' folders     #
+# from subdirectories of a folder                  #
+####################################################
+
 delete_all_pycache_folders() {
     local parent_folder="$1"
     
@@ -183,6 +211,9 @@ delete_all_pycache_folders() {
 }
 
 
+###################################
+# Function to move 'images' folders #
+###################################
 
 move_images_folders() {
     # First objective: Move the "images" folder out of "ROOT"
@@ -199,7 +230,10 @@ move_images_folders() {
 }
 
 
-# Generate delete commands for temporary folders
+##################
+# Main function #
+##################
+
 main() {
     generate_delete_command "ROOT/images"
     generate_delete_command "Python_code/images"
@@ -215,7 +249,7 @@ main() {
 
     # If all checks passed without requiring Dockerfile usage
     if [ -n "$python_version" ] && [ -n "$root_version" ] && [ -n "$pip_version" ]; then
-        '''while true; do
+        while true; do
             read -p "Do you want to check Python libraries availability? (y/n): " check_libraries
             case $check_libraries in
                 [yY]* )
@@ -227,7 +261,7 @@ main() {
                 * )
                     echo "Invalid response. Please respond with 'y' or 'n'."
             esac
-        done'''
+        done
 
         echo "Alright, let's start."
         Gen_files

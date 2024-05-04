@@ -15,7 +15,7 @@ For TMVA, the dataset is normalized using NormMode=NumEvents (average weight of 
 
 ##METTERE IMMAGINE QUI!!!!####
 
-##Principal Component Analysis description
+## Principal Component Analysis description
 
 Principal Component Analysis is used for both the TMVA and the Python analysis: it consists of a data transformation aimed at reducing the components of each image. To be more precise, each image is composed of 256 components, but not all of them are relevant for classification; the PCA transformation reduces the number of components in each image by finding the directions along which the features show the greatest variations. It helps to reduce the complexity of the data and at the same time improves the performance of the model; it is usually applied to high resolution images and it is also useful to avoid correlations between variables: the CNN classification seems to be more effective when the variables are not correlated. In the TMVA script, the PCA is entered directly by setting "Transformations=P" in the Factory object; in the Python analysis, the PCA is implemented in both the Keras and PyTorch models for the CNN, which requires more complex model definitions; moreover, these two models require a complex shape of the data, two-dimensional for the former and tensors for the latter. PCA transforms this shape into a one-dimensional array, which is easier to manage. 
 
@@ -26,11 +26,12 @@ For further details and explanations regarding the code implementation, please r
 
 
 # Comments on results obtained
-For the TMVA analysis, the most performing model seems to be the CNN, followed immediately by the DNN; the BDT semms a little worst in classification. The ROC-integer for each model is respectively 0.923, 0.919 and 0.804, with the CNN which shows also the better signal efficiency (0.925, 0,923 and 0.759 for the 30% of background, respectively).
-RUNNARE PYTHON E VEDERE COME VIENE
-
-
-
+For the TMVA analysis, the most performing model seems to be the CNN, followed immediately by the DNN; the BDT semms a little worst in classification. The ROC-integer for each model is respectively 0.941, 0.937 and 0.821, with the CNN which shows also the better signal efficiency (0.955, 0,950 and 0.781 for the 30% of background, respectively). CNN and DNN show very similar behaviour, while the BDT model is a little more discriminative, but still performs an efficient classification. However, the BDT shows a fast training, with 32 s for training and 0.65 s for evaluation; the DNN is also faster, with 17 s for training and 1.2 s for evaluation. The CNN is significantly slower, with 170 s for training and 8 s for evaluation.
+As far as the Python analysis is concerned, the results between the different models are very similar and all the models seem to perform quite well in the classification. The Torch CNN is the one with the higher accuracy and F1 score, while the DNN has the better accuracy; however, the values for the other model are not far from the optimum and in general they are about 86% for all the models. Again, the CNN with Keras has the slowest training time of 73 s, but the other models take 11 s, 5 s and 18 s for Torch CNN, BDT and DNN respectively. Confusion matrices were also computed to evaluate the performance of the classifiers: on the test dataset of 40,000 events, all models show about 17,000 true positives and true negatives, for a total of 34,000 correctly identified events; only the BDT performs slightly worse, with about 16,000 true positives and 16,000 true negatives. The ROC curves obtained from the Python analysis are quite consistent with the TMVA curves, as the CNN (both with Keras and PyTorch) and DNN curves almost overlap, while the BDT curve is slightly lower.
+In conclusion, CNNs are generally preferred for image classification due to
+-Their spatial invariance, which means that they are able to identify patterns even if they do not have the same position within the image.
+-The use of more layers makes the CNN suitable for learning complex patterns, since the first layers learn the simpler patterns, which are then used to learn more complex representations.
+Keras provides a user-friendly environment with predefined layers, making it easy for less experienced users to construct high-performance networks; PyTorch is more flexible, as the computational design of the network is defined dynamically and modified during the program run. However, it seems to be more complicated to implement. BDT and DNN are more flexible and generic models that seem to perform quite well in classifying background and signal images anyway: they are a suitable choice for image classification if the dataset is not too complicated and they provide easily interpretable results with reduced training time. In general, CNN are more complex models to train, but they can lead to very high performances; however, for our dataset, CNN leads to a slower training time without a significant improvement in the performances, especially with respect to the DNN model.
 
 # Folders organisation 
 
@@ -80,7 +81,7 @@ This project was tested on macOS [Versione] Sonoma (M2 chip) with:
 # Script description
 This section will examine the codes in detail, elucidating their operational characteristics. The aim is to provide a comprehensive analysis of their functionalities, elucidating each step to comprehensively understand what they do and how they accomplish it. 
 
-## Gen_data.C
+## Generation_Images.C
 The dataset generation process utilizes the Generation.C module within the ROOT folder through the function "Generation". It prompts the user to choose between using a default file generated with dimensions 16x16 and 100,000 events for signal and background, or generating a custom dataset. In the latter case, the user has the freedom to define the dataset dimensions and image format, even non-square ones, with certain constraints. It is necessary to specify that the code was tested woth the default configuration, so we expect differen performances if the dataset is changed.
 
 The "Generation" function requires three parameters: the number of images to generate ("n"), the height ("nh"), and the width ("nw") of the images. It defines a two-dimensional Gaussian distribution for both the signal and background using the ROOT TF2 class. The parameter "nRndmEvts" determines the number of events used to fill each image, representing the number of random events sampled from the signal and background distributions to create a single image example. A higher value of "nRndmEvts" can lead to more defined and realistic images but requires more computational resources to generate the data. Therefore, it is set to 10,000 (non-modifiable). The parameter "delta_sigma" represents the percentage difference in standard deviation (sigma) between the signal and background distributions. A higher value increases the difference between the widths of the background and signal distributions, making them easier to be distinguished. It is also set to 5% and is non-modifiable. Random noise is added to the signal, linked to the variable "pixelNoise", representing the level of noise added to each pixel of the generated image. It measures the dispersion or random variation of pixel values.
@@ -129,11 +130,11 @@ If "useTMVABDT" is true, the boosted decision tree (BDT) method is booked using 
   
 #### 2) TMVA_DNN
 This code block books the deep neural network (DNN) method via TMVA. Here's an explanation of the provided options:
-- "Layout": Defines the neural network architecture. In this case, the network has four dense layers with 100 neurons each, using ReLU activation and batch normalization. The last layer is a single neuron with linear activation, typically used for regression problems.
+- "Layout": Defines the neural network architecture. In this case, the network has four dense layers with 64 neurons each, using ReLU activation and batch normalization. The last layer is a single neuron with linear activation, typically used for classification problems.
 - "TrainingStrategy": Specifies the training strategies for the DNN. It includes parameters like learning rate, momentum, repetitions, convergence steps, batch size, etc...
 - "Architecture": Specifies the neural network architecture (CPU or GPU) depending on availability. If TMVA is compiled with GPU support, the GPU architecture will be used; otherwise, the CPU architecture will be used.
 
-
+A more detailed description is given below: the dense layers are formed by neurons completely connected to the output of the following layers; the number of neurons is chosen to be 64, since the default value of 100 degrades the performance, resulting in models too complex. A ReLU activation layer and a BNORM normalisation layer are introduced to allow the network to learn complex non-linear relations, the former and a more stable and faster training, the latter. Finally, the last linear with 1 neuron is usually chosen for a binary classification problem since it only has to report the probability of belonging to the signal or background class. 
 
 #### 3) TMVA_CNN
 This code block books the convolutional neural network (CNN) method via TMVA. Here's an explanation of the provided options:
@@ -143,10 +144,10 @@ This code block books the convolutional neural network (CNN) method via TMVA. He
 - "TrainingStrategy": Specifies the training strategies for the CNN, similar to those for the DNN.
 - "Architecture": Specifies the neural network architecture (CPU or GPU) depending on availability, similar to the DNN setup.
 
-
+The network is composed of two convolutional layers, each followed by a ReLU activation layer and a BNORM normalisation layer, similar to the DNN; two dense layers are added, each with 64 neurons: again, better performance is obtained by reducing the number of neurons. The MAXPOOL layer reduces the spatial dimension of the representation, keeping only the most important feature, while the RESHAPE layer transforms the data into a flat array that is passed to the dense layer. The final layer is again a single neuron linear layer, which is well suited to binary classification problems.
 
 ## Program_Start.py
-This Python script is designed to perform a series of training and evaluation operations on different machine learning models, comparing them with each other. The process involves the use of convolutional neural networks (CNNs) implemented both with TensorFlow-Keras and PyTorch, a gradient boosting algorithm (BDT), and a densely connected neural network (DNN). The final comparison is done through the creation and visualization of ROC curves for each model.
+This Python script is designed to perform a series of training and evaluation operations on different machine learning models, comparing them with each other. The process involves the use of convolutional neural networks (CNNs) implemented both with TensorFlow-Keras and PyTorch, a gradient boosting algorithm (BDT), and a deep connected neural network (DNN). The final comparison is done through the creation and visualization of ROC curves for each model.
 
 ### 1) DEPENDENCIES
 The code relies on multiple Python libraries, including os, tensorflow, numpy, pandas, torch, matplotlib.pyplot, and time. Additionally, it incorporates functions defined in separate Python files, organized within specific directories: "Evaluation", "Models", and "DataPreparation". 
@@ -172,13 +173,14 @@ The dataset preparation is handled by the "Control_PCA" function, which takes fe
     - The "_apply_pca_" function applies PCA to the normalized data with the specified number of components (stored in the variable "num_components"). It returns the transformed data after dimensionality reduction.
     - The "_apply_shuffle_" function shuffles the data to introduce randomness, which helps prevent model overfitting and ensures robustness. It shuffles the data while maintaining the correspondence between features and labels.
 - If the model is instead BDT, the X and y datasets are left unaltered and recalled as X_new.
+It is worth emphasising that the BDT model does not require data shuffling, since each decision tree is built independently of the order of the data and there is no sequential dependency as in neural networks; this means that the order of the data does not affect the training. On the other hand, in the DNN and CNN methods, the order of the data affects the learning; moreover, the shuffle prevents the model from learning patterns that are only present in a given order of the data.
 
 The function returns the variables "X_new", "y_new", and "n_principal_components". The code is initiated at the outset of each model.
 
 ### 4) MODEL CHOICE
 The user is prompted to choose which model to start with. The logic behind this is as follows: all four models can be experimented with, but once a model is chosen, it cannot be retried in subsequent prompts. Additionally, pressing button number 5 will display a ROC curve comparing all the executed models. If only one model has been executed, only one ROC curve will be displayed. However, if all four models have been executed, then four ROC curves will be shown. The button 5 also acts as an "exit" button, allowing the user to terminate the program. The dataset is split into training and test sets, and the model is trained and evaluated for each model, except for PyTorch, where the data is first converted into tensors before training and evaluation. After that, the four models are defined. 
 
-For the PyTorch-based model, we utilize the `trained_model` function to train the model, monitoring the time taken for training. Subsequently, we evaluate the model's performance on the test set using the `test_eval` function and generate predictions to compute metrics such as precision, F1 score, and accuracy. Finally, we visualize the ROC curve and training curves. Instead, for the Keras-based models (DNN and CNN), we train the model using Keras's `fit` method, monitoring the time taken for training. We then evaluate the model's performance on the test set and compute evaluation metrics, printing the ROC curve and training curves. Lastly, for the XGBoost-based model (BDT), we train the model using the `BDT_eval` function, evaluate its performance, and generate predictions to calculate evaluation metrics. Subsequently, we print the ROC curve and training curves. After each training and evaluation process of the models, parameters such as "f1", "accuracy", "precision", and "training time" are calculated and printed on a table. This table is updated each time with the results obtained from each model through the "table.py" module. Additionally, when button 5 is pressed, ROC curves of the trained models are generated and plotted.
+For the PyTorch-based model, we utilize the `trained_model` function to train the model, monitoring the time taken for training. Subsequently, we evaluate the model's performance on the test set using the `test_eval` function and generate predictions to compute metrics such as precision, F1 score, and accuracy. Finally, we visualize the ROC curve and training curves. Instead, for the Keras-based models (DNN and CNN), we train the model using Keras's `fit` method, monitoring the time taken for training. We then evaluate the model's performance on the test set and compute evaluation metrics, printing the ROC curve and training curves. Lastly, for the XGBoost-based model (BDT), we define and train the model using the 'BDT_model' function, while the `BDT_eval` function evaluates its performance, and generates predictions to calculate evaluation metrics. Subsequently, we print the ROC curve and training curves. After each training and evaluation process of the models, parameters such as "f1", "accuracy", "precision", and "training time" are calculated and printed on a table. This table is updated each time with the results obtained from each model through the "table.py" module. Additionally, when button 5 is pressed, ROC curves of the trained models are generated and plotted.
 
 #### 4.1) Train_Torch functions:
 - _accuracy function_: This function computes the accuracy of the model's predictions compared to the target labels. It takes the model's predictions (outputs) and the target labels (targets) as input and returns a scalar value representing the accuracy.
@@ -225,6 +227,8 @@ The function iterates through the model results in the "model_results" dictionar
 ---vedere forma finale-----
 
 ## Analysis.py
+SCRIVERE COME RUNNARLO, OKAY LO LASCIAMO SEPARATO MA ALLORA GIUSTIFICHIAMO E IMPLEMENTIAMO MEGLIOOOOOO e DIRE IN CHE CARTELLA METTIAMO I PLOT
+
 This code implements some function to analyse and visualize the input data; several functions are implemented:
 - _plot_images(num_images_to_plot, signal_data, background_data)_: takes as argument the number of images that the users wants to plot, the signal and background data; it is useful to visualize some images of the dataset, comparing signal and background
 - _pixel_intensity_distribution (sgn_mean,bkg_mean)_: it takes as arguments two arrays containing the mean pixel intensities; this value are used to obtrain the histograms of the intensity distribution. It is useful to understand how pixel are distributed within the images and to look for differences among signal and background data
@@ -232,6 +236,8 @@ This code implements some function to analyse and visualize the input data; seve
 - _plot_cluster_centers(centers1, centers2)_: it takes as arguments the centroids for signal and background clusters, obtained by the clustering algorithm as the mean representation of points within a cluster; it is helpful to focus on the principal features of data
 - _plot_pixel_distribution(signal_image, background_image)_: this function shows the distribution (the histogram) of pixel within the classes, together with the pixel correltation; it looks for pixel correlation and helps to understand differences in the intensity of images
 - _plot_intensity_profile(image_data1,image_data2, axis='row')_: it takes as argument the signal and background arrays; it is the visualization of the intensity profile of images along rows or columns, looking for differnces between signal and background alogn different directions
+
+The resulting plots show no significant differences between signal and background events; the pixel distribution and the pixel intensity distribution have a comparable behaviour, with some differences due to the intrinsic nature of the data. The same can be observed for the intensity profile and the cluster histograms: the two classes are distinguishable, but there is no bias in the distributions that could have affected the training, resulting in an overly simple classification.
 
 # How to run
 
@@ -254,23 +260,23 @@ $ ./Script.sh
 
 ## Run individual files
 
-Alternatively, you can run individual files. First, ensure you have a dataset. You can either download it using:
+Alternatively, you can run individual files. First, ensure you have a dataset: yuo have to open root within the "ROOT_Gen" directory and run the Generate_Images.C in the fllowing way:
 
-$ wget...
+$ root
 
-Or generate the dataset using the provided macro:
+$ .L Generate_Images.C
 
-$ .L [nome macro]
+$ Generate_Images (100000, 16, 16)
 
-$ nome funzione (n, nh, nw)
-
-Once you have the dataset, move it to the "Python_code" and "TMVA" directories. Now you can execute the following commands:
+Once you have the dataset, move it to the "Python_code" and "TMVA_ML" directories. Now you can execute the following commands:
 
 Inside "TMVA":
 
-$ .L [Nome file]
+$root
 
-$ Nome funzione
+$ .L TMVA_Classification
+
+$ TMVA_Classification()
 
 Inside "Python_code":
 
