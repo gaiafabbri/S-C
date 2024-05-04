@@ -52,7 +52,6 @@ void TMVA_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1, 1, 
    bool useKerasCNN = (opt.size() > 1) ? opt[1] : false;
    bool useTMVADNN = (opt.size() > 2) ? opt[2] : false;
    bool useTMVABDT = (opt.size() > 3) ? opt[3] : false;
-   bool usePyTorchCNN = (opt.size() > 4) ? opt[4] : false;
 //-----------------------------------------------------------------------------------
 
 
