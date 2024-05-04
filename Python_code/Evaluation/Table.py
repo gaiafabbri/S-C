@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
+'''If user wants to run python code not via bash file, change the path to save table from "Python_code/plot_results" to "plot_results" in the whole code'''
+
 ''' -------------- SAVING METRICS AND TRAINING TIME --------------------'''
 '''
  1) This function saves the results of multiple models as a table.
@@ -55,7 +57,7 @@ def save_results_table(model_results, results_df):
 
 
     # Saving table
-    plt.savefig('plot_results/Results.png', bbox_inches='tight', pad_inches=0.05)
+    plt.savefig('Python_code/plot_results/Results.png', bbox_inches='tight', pad_inches=0.05)
 
     plt.close()
 
