@@ -260,32 +260,35 @@ $ ./Script.sh
 
 ## Run individual files
 
-Alternatively, you can run individual files. First, ensure you have a dataset: yuo have to open root within the "ROOT_Gen" directory and run the Generate_Images.C in the fllowing way:
+Alternatively, you can run individual files. First, make sure you have a dataset. The user needs to download the dataset from Google Drive:
 
-$ root
+$ wget "https://drive.google.com/uc?export=download&id=1U3NjuMTeNWjFe9Rgen64FauayAMxZTel" -O images_data_16x16_100000.root
 
-$ .L Generate_Images.C
+Then user needs to put "images_data_16x16_100000.root" into a folder called "images" and move in TMVA_ML and Python_code. When finished, the user can run the code:
 
-$ Generate_Images (100000, 16, 16)
+$ root -l TMVA_ML/TMVA_Classification.C
 
-Once you have the dataset, move it to the "Python_code" and "TMVA_ML" directories. Now you can execute the following commands:
+$ python3 Python_code/Program_Start.py
 
-Inside "TMVA":
-
-$root
-
-$ .L TMVA_Classification
-
-$ TMVA_Classification()
-
-Inside "Python_code":
-
-$ python3 Program_start.py
 
 ## Only dockerfile
 
 If you prefer to run the dockerfile directly, follow these instructions:
 
-$
+### Python dockerfile
+
+Scaricare il dataset come fatto in precedenza in 'S-C' folder:
+
+$ wget "https://drive.google.com/uc?export=download&id=1U3NjuMTeNWjFe9Rgen64FauayAMxZTel" -O images_data_16x16_100000.root
+
+The user must extract the 'dockerfile_Python' and 'requirements.txt' files from the 'Docker_Folder' and place them in the 'S-C' folder, then run dockerfile in 'S-C' from the terminal:
+
+$ docker build -t <name_image> -f dockerfile_Python .
+
+$ docker run --rm -it <name_image>
+
+
+### ROOT dockerfile
+
 
 

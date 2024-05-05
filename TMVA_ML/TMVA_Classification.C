@@ -20,7 +20,6 @@
     # TMVA Classification Example Using a Convolutional Neural Network
  
 **/
-/*If user wants to run TMVA code not via bash file, change the folder path from "TMVA_ML/images" to "images" in the whole code*/
 //-----------------------------------------------------------------------------------
 /// @brief Run the TMVA CNN Classification example
 /// @param nevts : number of signal/background events. Use by default a low value (1000)

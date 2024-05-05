@@ -86,7 +86,7 @@ update_python_libraries() {
     check_library "pandas" "2.2.1"
     check_library "numpy" "1.26.4"
     check_library "tensorflow" "2.16.1"
-    check_library "keras" "3.1.1"
+    check_library "keras" "3.3.3"
     check_library "torch" "2.2.2"
     check_library "uproot" "5.3.2"
 
@@ -194,7 +194,17 @@ generate_delete_command() {
 ##################################
 
 Gen_files(){
-    root -l -q "ROOT_Gen/Generation_Images.C(10000, 16, 16)"
+    while true; do
+        read -p "Do you want to generate or download a dataset? (g/d): " choice
+        case $choice in
+            [Gg]* ) root -l -q "ROOT_Gen/Generation_Images.C(100000, 16, 16)"; break;;
+            [Dd]* )
+                mkdir -p ROOT_Gen/images
+                wget "https://drive.google.com/uc?export=download&id=1U3NjuMTeNWjFe9Rgen64FauayAMxZTel" -O ROOT_Gen/images/images_data_16x16_100000.root
+                break;;
+            * ) echo "Please choose g to generate or d to download.";;
+        esac
+    done
 }
 
 
@@ -217,7 +227,7 @@ delete_all_pycache_folders() {
 
 move_images_folders() {
     # First objective: Move the "images" folder out of "ROOT"
-    mv "ROOT/images" "./"
+    mv "ROOT_Gen/images" "./"
 
     # Second objective: Make a copy and move it into "TMVA_ML"
     cp -r "images" "TMVA_ML/"
@@ -235,7 +245,7 @@ move_images_folders() {
 ##################
 
 main() {
-    generate_delete_command "ROOT/images"
+    generate_delete_command "ROOT_Gen/images"
     generate_delete_command "Python_code/images"
     generate_delete_command "TMVA_ML/images"
     generate_delete_command "Python_code/plot_results"

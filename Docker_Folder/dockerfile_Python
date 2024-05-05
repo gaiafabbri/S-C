@@ -1,0 +1,21 @@
+# Usa un'immagine di Python come base
+FROM python:3.11.5
+
+# Imposta il working directory nel container
+WORKDIR /app
+
+
+# Copia tutti i file necessari nella directory /app nel container
+COPY Python_code Python_code
+COPY images images
+COPY images /app/Python_code/images
+COPY requirements.txt requirements.txt
+
+# Installa le dipendenze del progetto
+RUN rm -rf /app/images
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+# Comando per eseguire il programma Python quando il container viene avviato
+CMD ["python3", "Python_code/Program_Start.py"]
+
