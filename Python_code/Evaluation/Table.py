@@ -1,7 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-'''If user wants to run python code not via bash file, change the path to save table from "Python_code/plot_results" to "plot_results" in the whole code'''
 
 ''' -------------- SAVING METRICS AND TRAINING TIME --------------------'''
 '''
