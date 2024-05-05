@@ -31,8 +31,6 @@ from Evaluation.PredictionBDT import BDT_eval, print_ROC_BDT, plot_training_curv
 from Evaluation.Table import save_results_table
 
 
-'''If user wants to run python code not via bash file, change the folder path from "Python_code/images" to "images" and "Python_code/plot_results" to "plot_results" in the whole code'''
-
 '''------------------ END IMPORT ------------------'''
 
 
