@@ -195,12 +195,12 @@ generate_delete_command() {
 
 Gen_files(){
     while true; do
-        read -p "Do you want to generate or download a dataset? (g/d): " choice
+        read -p "Do you want to generate or download a dataset? Please check the filename in the code! (g = generate/d = download): " choice
         case $choice in
             [Gg]* ) root -l -q "ROOT_Gen/Generation_Images.C(100000, 16, 16)"; break;;
             [Dd]* )
                 mkdir -p ROOT_Gen/images
-                wget "https://drive.google.com/uc?export=download&id=1U3NjuMTeNWjFe9Rgen64FauayAMxZTel" -O ROOT_Gen/images/images_data_16x16_100000.root
+                wget "https://drive.google.com/uc?export=download&id=1U3NjuMTeNWjFe9Rgen64FauayAMxZTel" -O ROOT_Gen/images/images_data_16x16_10000.root
                 break;;
             * ) echo "Please choose g to generate or d to download.";;
         esac
@@ -276,64 +276,61 @@ main() {
         echo "Alright, let's start."
         Gen_files
         move_images_folders
-        read -p "Do you want to start the ROOT program now? (1 = yes, 2 = no, I prefer starting with Python, 3 = run both): " choice_root
-        check_root_file
-        case $choice_root in
-            1)
-                echo "Running the ROOT program..."
-                root -l TMVA_ML/TMVA_Classification.C
-                while true; do
-                read -p "Do you want to start the Python program now? (y/n): " rerun_py
-                case $rerun_py in
-                    [yY]* )
-                        echo "Running the Python program..."
-                        python3 Python_code/Program_Start.py
-                        break;;
-                    [nN]* )
-                        echo "Goodbye!"
-                        exit;;
-                        * )
-                            echo "Invalid input. Please respond with 'y' or 'n'."
-                            ;;
-                    esac
-                done
-                ;;
-            2)
-                echo "Running the Python program..."
-                python3 Python_code/Program_Start.py #path to folder
-                while true; do
-                    read -p "Do you want to start the ROOT program now? (y/n): " rerun_root
-                    case $rerun_root in
-                        [yY]* )
-                            echo "Running the ROOT program..."
-                            root -l TMVA_ML/TMVA_Classification.C #path to folder
-                            break
-                            ;;
-                        [nN]* )
-                            echo "Goodbye!"
-                            exit
-                            ;;
-                        * )
-                            echo "Invalid input. Please respond with 'y' or 'n'."
-                            ;;
-                    esac
-                done
-                ;;
-            3)
-                echo "Running the ROOT program..."
-                root -l TMVA_ML/TMVA_Classification.C #path to folder
-                echo "Running the Python program..."
-                python3 Python_code/Program_Start.py #path to folder
-                ;;
-            *)
-                echo "Invalid selection. Skipping execution."
-                ;;
-        esac
+
+        while true; do
+            read -p "Do you want to start the ROOT program now? (1 = yes, 2 = no, I prefer starting with Python, 3 = run both): " choice_root
+            case $choice_root in
+                1)
+                    echo "Running the ROOT program..."
+                    root -l TMVA_ML/TMVA_Classification.C
+                    while true; do
+                        read -p "Do you want to start the Python program now? (y/n): " rerun_py
+                        case $rerun_py in
+                            [yY]* )
+                                echo "Running the Python program..."
+                                python3 Python_code/Program_Start.py
+                                break;;
+                            [nN]* )
+                                echo "Goodbye!"
+                                exit;;
+                            * )
+                                echo "Invalid input. Please respond with 'y' or 'n'."
+                                ;;
+                        esac
+                    done
+                    ;;
+                2)
+                    echo "Running the Python program..."
+                    python3 Python_code/Program_Start.py
+                    while true; do
+                        read -p "Do you want to start the ROOT program now? (y/n): " rerun_root
+                        case $rerun_root in
+                            [yY]* )
+                                    echo "Running the ROOT program..."
+                                    root -l TMVA_ML/TMVA_Classification.C
+                                    break;;
+                            [nN]* )
+                                    echo "Goodbye!"
+                                    exit;;
+                                * )
+                                    echo "Invalid input. Please respond with 'y' or 'n'."
+                                    ;;
+                        esac
+                    done
+                    ;;
+                3)
+                    echo "Running the ROOT program..."
+                    root -l TMVA_ML/TMVA_Classification.C
+                    echo "Running the Python program..."
+                    python3 Python_code/Program_Start.py
+                    ;;
+                *)
+                    echo "Invalid selection."
+                    ;;
+            esac
+        done
     fi
 }
 
 # Execute the main function
 main
-
-
-

@@ -33,6 +33,15 @@ In conclusion, CNNs are generally preferred for image classification due to
 -The use of more layers makes the CNN suitable for learning complex patterns, since the first layers learn the simpler patterns, which are then used to learn more complex representations.
 Keras provides a user-friendly environment with predefined layers, making it easy for less experienced users to construct high-performance networks; PyTorch is more flexible, as the computational design of the network is defined dynamically and modified during the program run. However, it seems to be more complicated to implement. BDT and DNN are more flexible and generic models that seem to perform quite well in classifying background and signal images anyway: they are a suitable choice for image classification if the dataset is not too complicated and they provide easily interpretable results with reduced training time. In general, CNN are more complex models to train, but they can lead to very high performances; however, for our dataset, CNN leads to a slower training time without a significant improvement in the performances, especially with respect to the DNN model.
 
+# TMVA Analysis Results:
+Some TMVA plots are reported in the "__TMVA_plot__" folder; they are obtained by running "TMVA_Classification.C". The macro automatically creates a folder called "__dataset__" containing the "__weights__" folder with the weight files for each method booked by TMVA, and the "__plots__" folder; they are deleted by the bash file wherever it is run, but some examples are reported. Among them:
+-The overtraining test evaluates the response of the model to the test sample; it measures the ability of the model to generalise the prediction to an unknown dataset. It looks at the distribution of training and test data, and if the model is learning correctly, the two distributions should look similar. The Kolmogorov-Smirnov test quantifies the differences between the two distributions and returns a value D, which must be as small as possible, indicating that the two distributions are close; if this value is small, the model is correctly trained and the probability of overtraining is reduced. For the models implemented, the D values are small (from 0.047 for the BDT to 0.451 for the DNN for signal, for example) and the test and training data distributions overlap, indicating that there is no overtraining;
+-the response distribution of the models: the DNN and the CNN show two well-separated distributions, peaked at 1 for signal and at 0 for background, indicating that the models separate the two classes well; the BDT, on the other hand, shows two more overlapping distributions, indicating that the model does not perform in the same way, as the ROC curve has already shown. The response distribution in this case peaks around 0.1 for signal and around -0.1 for background, so the two peaks are separated but not absolutely. The different values of the peaks may also indicate a different learning strategy with respect to neural networks.
+-The distribution of the signal probability for the DNN and for the CNN: in both cases, the signal probability has a peak around zero for the background images and a peak around one for the signal images; however, the peak for the signal is smaller and the signal probability is present throughout the entire interval, indicating that the models have some difficulties in accurately stating when the signal is actually present. 
+-The distribution of signal rarity for the DNN and the CNN show similar results to the signal probability distribution; for both models the peak around zero for background is present and the peak around one for signal is higher with respect to the signal probability. It is a measure of the rarity of the signal with respect to the background, so the distinction between the two classes is more pronounced with respect to the signal probability; it can be interpreted as the fact that around one the models are more certain to find signal, but the presence of signal in the whole interval between 0 and 1 indicates that the models are not sure in the classification of the two classes.
+-The inverse of the background rejection as a function of the signal efficiency is shown; it represents the ability of the model to detect and reject the background. It must peak at low values of signal efficiency, indicating that the models perform well in discriminating the signal when the background rejection is high (and so the curve goes to zero).
+They are obtained by adding to the macro the line "TMVA::TMVAGui( outfileName )": in this way the root file "TMVA_CNN_ClassificationOutput.root" is given as input to some macros that are automatically executed by the user on a graphical canvas; once the root code is executed, the Gui menu is opened and by simply pressing the selections the plot is displayed and saved.
+
 # Folders organisation 
 
 The project structure includes:
@@ -55,28 +64,27 @@ The project structure includes:
         - "TrainTorch.py"
         - "Table.py", responsible for tabulating results from each model (f1 score, accuracy, precision), highlighting the best-performing model. Additionally, it includes a column displaying the training time for each investigated model.
 - Inside the project, there's also a folder named "__TMVA_ML__". This folder contains a file named "TMVA.C". When executed with the provided bash file (see below), it will generate an additional folder named "images". This folder is generated using "Generation.C" and contains the dataset created. The methods implemented within "TMVA.C" include a Convolutional Neural Network (CNN), Deep Neural Network (DNN), and Boosted Decision Tree (BDT). This file originates from an example provided in the ROOT tutorials, accessible via the following link: 'https://root.cern/doc/master/TMVA__CNN__Classification_8C.html'
-
-- An executable bash file called '__Script.sh__' which serves as a tool for project setup and management. It automates various tasks such as project cleanup, verification of ROOT and Python installations, library compatibility checks, and dataset generation. It allows users to select their preferred training environment (ROOT or Python).
-
-- 
-- Il "__dockerfile__" che è stato costruito nel caso in cui l'utente non abbia ROOT e/o Python. Esso crea un ambiente per poter usare sia ROOT, sia Python indipendentemente dalla presenza di uno o dell'altro sul computer. In termini pratici sostituirà l'eseguibile "run.sh" replicandone i compiti e la gestione del progetto.
-
-
+- a folder called "__Docker_Folder__" containing the dockerfile both for the TMVA and the ROOT codes: they are "dockerfile_Python" and "dockerfile_Root"; within the same folder there is also the file "requirements.txt" containing all dependences necessary to run the python script. It is obtained running from shell the command pip freeze > requirements.txt. More details on the dockerfiles are given in the "__How to run__" section
+- An executable bash file called '__Script.sh__' which serves as a tool for project setup and management. It automates various tasks such as project cleanup, verification of ROOT and Python installations, library compatibility checks, and dataset generation. It allows users to select their preferred training environment (ROOT or Python)
+- the folder "__TMVA_plot__" contains some plots automatically originated by the "TMVA_Classification.C" macro; it include the trainign history, the BDT construction scheme, the signal probability distribution and the PDF for CNN and DNN. A further description is provided in the respective section "TMVA Analysis Results".
+- the "Analysis.py" script performs some analysis on the input images, as the pixel intensity distribution and the correlation between pixels; more details are reported below
+- the "__analysis_results__" folder contains the plot obtained by running the "Analysis.py" script
 
 
 # Versioni usate e pacchetti richiesti
 This project was tested on macOS [Versione] Sonoma (M2 chip) with:
-- ROOT version: ...
-- Python version: ...
-  - Pandas
-  - Numpy
-  - Torch
-  - Tensorflow
-  - Keras
-  - Scikit-learn
-  - Matplotlib
-  - Xgboost
-  - Uproot
+- ROOT version: 6.30.06
+- Python version: 3.11.5
+  - Pandas 2.2.1
+  - Numpy 1.26.4
+  - Torch 2.2.2
+  - Tensorflow 2.16.1
+  - Keras 3.3.3
+  - Scikit-learn 1.4.2
+  - Matplotlib 3.7.2
+  - Xgboost 2.0.3
+  - Uproot 5.3.2
+  The overall requirements are reported in the "requirements.txt" file in the folder "__Docker_Folder__".
 
 # Script description
 This section will examine the codes in detail, elucidating their operational characteristics. The aim is to provide a comprehensive analysis of their functionalities, elucidating each step to comprehensively understand what they do and how they accomplish it. 
@@ -219,7 +227,7 @@ The function iterates through the model results in the "model_results" dictionar
 - _Project Cleanup_: Removes directories from previous runs, including "ROOT/images", "Python_code/images", "Python_code/plot_results", and all "pycache" folders within "Python_code" and its subdirectories. This task is handled by the "generate_delete_command" function
 - _ROOT and Python Verification_: Checks for the presence of ROOT and Python on the computer and ensures their compatibility with the tested code version. If Python and/or ROOT are not present, or if their versions are incompatible, the dockerfile is executed. Additionally, it verifies the presence and version of pip for potential Python library installation. This code is executed by the "check_python", "check_root_version", and "check_pip" functions.
 - _Library Compatibility Check and Update_: Asks the user if they want to verify the presence and compatibility of necessary libraries. If the user chooses not to verify, a message displaying the versions used is printed to the terminal. If the user opts for verification, missing libraries are installed if desired, otherwise the user is prompted to use the dockerfile. If libraries are present but outdated, they are updated to the tested version. If they are more recent than the tested version, they are adjusted. Both actions are performed only if the user desires; otherwise, the code continues its execution, although consequences may be unknown. This code is executed by the "update_python_libraries" function.
-- _Dataset Generation_:Asks the user if they want to generate their dataset or use the default one. If chosen to generate, the dataset is created using "Generation.C", allowing the user to specify the number, height, and width of images. If chosen not to generate, the dataset is downloaded using the wget method. In both cases, a "images" folder is created where the dataset is placed. This part of the code is managed by the "Gen_files" function. (__fare il wget__)
+- _Dataset Generation/Downloading_: the user has to decide whether to download the dataset using wget or to generate it; the former requires wget to be installed, but the latter takes time to complete the generation of 100000 events. __Note:__ the code is optimised to run with 100000 events and in this case the better performances are obtained, especially for the stability of the training (looking at the training history); however, the dimension of this file is too large to be managed by wget, so I chose a dataset of only 10000 events to download. If the user wants to run the code using the dockerfile, they will have to download the dataset using wget. __In any case, always check that the filename is correct in both the Python code and the TMVA code__.
 - _Copying Dataset_:The "images" folder containing the dataset is copied and moved to the "CNN_python" and "TMVA_ML" directories. This code is executed by "move_images_folders" function.
 -  _File Presence Verification_: Verifies the presence of the file in various subdirectories.This code is executed by "check_root_file" function. 
 -  _Training Environment Selection_: Asks the user to choose whether to start training with ROOT or Python. Then, the user can decide if they want to experiment with the other file as well. This is managed in the main script through keyboard commands.
@@ -227,8 +235,6 @@ The function iterates through the model results in the "model_results" dictionar
 ---vedere forma finale-----
 
 ## Analysis.py
-SCRIVERE COME RUNNARLO, OKAY LO LASCIAMO SEPARATO MA ALLORA GIUSTIFICHIAMO E IMPLEMENTIAMO MEGLIOOOOOO e DIRE IN CHE CARTELLA METTIAMO I PLOT
-
 This code implements some function to analyse and visualize the input data; several functions are implemented:
 - _plot_images(num_images_to_plot, signal_data, background_data)_: takes as argument the number of images that the users wants to plot, the signal and background data; it is useful to visualize some images of the dataset, comparing signal and background
 - _pixel_intensity_distribution (sgn_mean,bkg_mean)_: it takes as arguments two arrays containing the mean pixel intensities; this value are used to obtrain the histograms of the intensity distribution. It is useful to understand how pixel are distributed within the images and to look for differences among signal and background data
@@ -237,7 +243,11 @@ This code implements some function to analyse and visualize the input data; seve
 - _plot_pixel_distribution(signal_image, background_image)_: this function shows the distribution (the histogram) of pixel within the classes, together with the pixel correltation; it looks for pixel correlation and helps to understand differences in the intensity of images
 - _plot_intensity_profile(image_data1,image_data2, axis='row')_: it takes as argument the signal and background arrays; it is the visualization of the intensity profile of images along rows or columns, looking for differnces between signal and background alogn different directions
 
-The resulting plots show no significant differences between signal and background events; the pixel distribution and the pixel intensity distribution have a comparable behaviour, with some differences due to the intrinsic nature of the data. The same can be observed for the intensity profile and the cluster histograms: the two classes are distinguishable, but there is no bias in the distributions that could have affected the training, resulting in an overly simple classification.
+__how to run:__ in the main folder: 
+
+$ python3 Analysis.py
+
+The resulting plots are saved in the "__analysis_results__" folder and show no significant differences between signal and background events; the pixel distribution and the pixel intensity distribution have a comparable behaviour, with some differences due to the intrinsic nature of the data. The same can be observed for the intensity profile and the cluster histograms: the two classes are distinguishable, but there is no bias in the distributions that could have affected the training, resulting in an overly simple classification.
 
 # How to run
 
@@ -277,7 +287,7 @@ If you prefer to run the dockerfile directly, follow these instructions:
 
 ### Python dockerfile
 
-Scaricare il dataset come fatto in precedenza in 'S-C' folder:
+Download the dataset as done above into the 'S-C' folder:
 
 $ wget "https://drive.google.com/uc?export=download&id=1U3NjuMTeNWjFe9Rgen64FauayAMxZTel" -O images_data_16x16_100000.root
 
