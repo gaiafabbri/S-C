@@ -35,7 +35,7 @@ void TMVA_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1})
  
     //Accessing the input file, printin an error message if the file is not found
    int imgSize = 16 * 16;
-   TString inputFileName = "TMVA_ML/images/images_data_16x16_10000.root";
+   TString inputFileName = "TMVA_ML/images/images_data_16x16_100000.root";
  
    bool fileExist = !gSystem->AccessPathName(inputFileName);
  

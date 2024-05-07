@@ -4,8 +4,16 @@
 ## TMVA results:
 For the TMVA analysis, the most performing model seems to be the CNN, followed immediately by the DNN; the BDT semms a little worst in classification. The ROC-integer for each model is respectively 0.941, 0.937 and 0.821, with the CNN which shows also the better signal efficiency (0.955, 0,950 and 0.781 for the 30% of background, respectively). CNN and DNN show very similar behaviour, while the BDT model is a little more discriminative, but still performs an efficient classification. However, the BDT shows a fast training, with 32 s for training and 0.65 s for evaluation; the DNN is also faster, with 17 s for training and 1.2 s for evaluation. The CNN is significantly slower, with 170 s for training and 8 s for evaluation.
 
+<p align="center">
+  <img src="https://github.com/gaiafabbri/S-C/blob/main/Classification_results/TMVA_ROC.png">
+</p>
+
 ## Python results:
 As far as the Python analysis is concerned, the results between the different models are very similar and all the models seem to perform quite well in the classification. The Torch CNN is the one with the higher accuracy and precision, while the DNN has the better F1 score; however, the values for the other model are not far from the optimum and in general they are about 86% for all the models. Again, the CNN with Keras has the slowest training time of 66 s, but the other models take 11 s, 5 s and 21 s for Torch CNN, BDT and DNN respectively. Confusion matrices were also computed to evaluate the performance of the classifiers: on the test dataset of 40,000 events, all models show about 17,000 true positives and true negatives, for a total of 34,000 correctly identified events; only the BDT performs slightly worse, with about 16,000 true positives and 16,000 true negatives. The ROC curves obtained from the Python analysis are quite consistent with the TMVA curves, as the CNN (both with Keras and PyTorch) and DNN curves almost overlap, while the BDT curve is slightly lower.
+
+<p align="center">
+  <img src="https://github.com/gaiafabbri/S-C/blob/main/Classification_results/Comparison_among_models_100000_16x16.png">
+</p>
 
 ## Conclusion:
 In conclusion, CNNs are generally preferred for image classification due to
