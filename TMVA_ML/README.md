@@ -1,4 +1,4 @@
-## TMVA_Classification.C ---vedere forma finale-----
+## TMVA_Classification.C 
 
 ### Preparing the environment and the dataset
 This code is an application which uses the TMVA (Toolkit for Multivariate Analysis) environement to classify signal and background images implementing a CNN, a DNN and a BDT TMVA methods; the analysis is performed througout the function TMVA_Classification()', which takes as input the number of 'nevts' and the 'opt' vector containign the possible methods used for classification. 

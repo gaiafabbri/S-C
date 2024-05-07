@@ -1,3 +1,5 @@
+# Some comments about code
+
 A brief description of the Python code is given below; the project contains a main script, "Program_Start.py", and a series of folders containing the functions imported into the main script; the functions are implemented in the files within the folders, divided according to their functionality.
 
 ## Program_Start.py

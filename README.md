@@ -5,11 +5,7 @@ The results are obtained using a dataset of 16x16 images, containing 100,000 ima
 
 In Python, the dataset undergoes normalization of pixel data to a range of 0 to 1, label creation for signal and background (assigned numbers 0 and 1 respectively), and Principal Component Analysis (PCA) for dimensionality reduction. This preprocessing is applied to neural network models, while BDT utilizes normalized data with labels for signal and background without PCA. 
 
-The majopr aim of this project is to perform a comparison between the TMVA tutorials "CNN_Classification.C" available on the ROOT website at the link: 'https://root.cern/doc/master/TMVA__CNN__Classification_8C.html' and the Python script; the original codes contains also a PyKeras and PyTorch classification. This part was extracted and re-written in order to apply what learned during the lessons and to improve my knoledge about machine learning tecnique. The same method are implemented in the same script: the TMVA coe was only modify and taken as a reference to build the python analysis. The implementation of the method is surely different passing from root to python environment, and this affect also performances (see later the paragraph about the results).
-
-For TMVA, the dataset is normalized using NormMode=NumEvents (average weight of 1 per event, independently for signal and background, eand the models are trained  and tested accordingly to the configuration options. Results are visualized to compare the performance of different algorithms. 
-
-The results of the comparison between different tecnhiques both for Python and TMVA analysis are presented in the "__Classification_Results__" folder.
+The major aim of this project is to perform a comparison between the TMVA tutorials "CNN_Classification.C" available on the ROOT website at the link: 'https://root.cern/doc/master/TMVA__CNN__Classification_8C.html' and the Python script; the original codes contains also a PyKeras and PyTorch classification. This part was extracted and re-written in order to apply what learned during the lessons and to improve my knoledge about machine learning tecnique. The same method are implemented in the same script: the TMVA code was only modify and taken as a reference to build the python analysis. The implementation of the method is surely different passing from root to python environment, and this affect also performances (see later the paragraph about the results). The results of the comparison between different tecnhiques both for Python and TMVA analysis are presented in the "__Classification_Results__" folder.
 
 
 ## Principal Component Analysis description
@@ -42,7 +38,7 @@ The project structure includes:
         - "PredictionBDT.py"
         - "TrainTorch.py"
         - "Table.py", responsible for tabulating results from each model (f1 score, accuracy, precision), highlighting the best-performing model. Additionally, it includes a column displaying the training time for each investigated model.
-- Inside the project, there's also a folder named "__TMVA_ML__". This folder contains a file named "TMVA.C". When executed with the provided bash file (see below), it will generate an additional folder named "images". This folder is generated using "Generation.C" and contains the dataset created. The methods implemented within "TMVA.C" include a Convolutional Neural Network (CNN), Deep Neural Network (DNN), and Boosted Decision Tree (BDT). This file originates from an example provided in the ROOT tutorials, accessible via the following link: 'https://root.cern/doc/master/TMVA__CNN__Classification_8C.html'
+- Inside the project, there's also a folder named "__TMVA_ML__". This folder contains a file named "TMVA.C". When executed with the provided bash file (see below), it will generate an additional folder named "images". This folder is generated using "Generation.C" and contains the dataset created. The methods implemented within "TMVA.C" include a CNN, DNN, and BDT. This file originates from an example provided in the ROOT tutorials, accessible via the following link: 'https://root.cern/doc/master/TMVA__CNN__Classification_8C.html'
 - a folder called "__Docker_Folder__" containing the dockerfile both for the TMVA and the ROOT codes: they are "dockerfile_Python" and "dockerfile_Root"; within the same folder there is also the file "requirements.txt" containing all dependences necessary to run the python script. It is obtained running from shell the command pip freeze > requirements.txt. More details on the dockerfiles are given in the "__How to run__" section
 - An executable bash file called '__Script.sh__' which serves as a tool for project setup and management. It automates various tasks such as project cleanup, verification of ROOT and Python installations, library compatibility checks, and dataset generation. It allows users to select their preferred training environment (ROOT or Python)
 - the folder "__TMVA_plot__" contains some plots automatically originated by the "TMVA_Classification.C" macro; it include the trainign history, the BDT construction scheme, the signal probability distribution and the PDF for CNN and DNN. A further description is provided in the respective section "TMVA Analysis Results".
@@ -67,9 +63,10 @@ This project was tested on macOS [Versione] Sonoma (M2 chip) with:
   - Matplotlib 3.7.2
   - Xgboost 2.0.3
   - Uproot 5.3.2
-  The overall requirements are reported in the "requirements.txt" file in the folder "__Docker_Folder__".
 
-## Script.sh ---vedere forma finale-----
+The overall requirements are reported in the "requirements.txt" file in the folder "__Docker_Folder__".
+
+## Script.sh 
 - _Project Cleanup_: Removes directories from previous runs, including "ROOT/images", "Python_code/images", "Python_code/plot_results", and all "pycache" folders within "Python_code" and its subdirectories. This task is handled by the "generate_delete_command" function
 - _ROOT and Python Verification_: Checks for the presence of ROOT and Python on the computer and ensures their compatibility with the tested code version. If Python and/or ROOT are not present, or if their versions are incompatible, the dockerfile is executed. Additionally, it verifies the presence and version of pip for potential Python library installation. This code is executed by the "check_python", "check_root_version", and "check_pip" functions.
 - _Library Compatibility Check and Update_: Asks the user if they want to verify the presence and compatibility of necessary libraries. If the user chooses not to verify, a message displaying the versions used is printed to the terminal. If the user opts for verification, missing libraries are installed if desired, otherwise the user is prompted to use the dockerfile. If libraries are present but outdated, they are updated to the tested version. If they are more recent than the tested version, they are adjusted. Both actions are performed only if the user desires; otherwise, the code continues its execution, although consequences may be unknown. This code is executed by the "update_python_libraries" function.
@@ -78,7 +75,6 @@ This project was tested on macOS [Versione] Sonoma (M2 chip) with:
 -  _File Presence Verification_: Verifies the presence of the file in various subdirectories.This code is executed by "check_root_file" function. 
 -  _Training Environment Selection_: Asks the user to choose whether to start training with ROOT or Python. Then, the user can decide if they want to experiment with the other file as well. This is managed in the main script through keyboard commands.
 
----vedere forma finale-----
 
 
 # How to run

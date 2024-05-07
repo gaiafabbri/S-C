@@ -197,7 +197,7 @@ Gen_files(){
     while true; do
         read -p "Do you want to generate or download a dataset? Please check the filename in the code! (g = generate/d = download): " choice
         case $choice in
-            [Gg]* ) root -l -q "ROOT_Gen/Generation_Images.C(100000, 16, 16)"; break;;
+            [Gg]* ) root -l -q "ROOT_Gen/Generation.C(100000, 16, 16)"; break;;
             [Dd]* )
                 mkdir -p ROOT_Gen/images
                 wget "https://drive.google.com/uc?export=download&id=1U3NjuMTeNWjFe9Rgen64FauayAMxZTel" -O ROOT_Gen/images/images_data_16x16_10000.root
