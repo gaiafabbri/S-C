@@ -6,14 +6,10 @@ from torch.utils.data import DataLoader
 
 '''------------------ MODEL DEFINITION ------------------'''
 '''The model is defined as follows:
-1) The Reshape layer is necessary since we are dealing with images presented as multidimensional arrays
-2) The Conv2d layer extracts the images pattern ("padding"=1 means that borders are not reduced)
+1) The Reshape layer is necessary to make the input match the number of principal componests desired 
+2) Three Linear layers are present, with 64, 32 and 64 neurons respectively
 3)The relu activation function after each convolutional layer is not linear and helps to learn complex characteristics in the model
-4) The BatchNormalization layer is used to make the training more reliable and faster
-5) The MaxPooling layer reduces the input spatial dimension
-6) The Flatten layer ensures that the output of the previous steps is a one-dimensional array to be passed to the following dense layer with a relu activation function
-7) The linear layers are used to covnert the extracted features into a binary classification suitable for this analysis
-6)the output layer uses a sigmoid function to generate the probability distribution for an image to belong to the singal or background classes; this is common for binary classification problem
+4) The Sigmoid layer is introduced to have an aoutput between 0 and 1 which is interpreted as the probability to belong to signal or background classes
 '''
 
 
