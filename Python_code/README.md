@@ -43,6 +43,7 @@ It contains the definitions of the model implemented, together with some comment
 -__keras_PCA__" model is composed by an input layer, a convolutional layer, a MaxPooling layre, a Flatten layer to flatten the output and a layer given by the "sigmoid" activation function suitable for a binary classification problem
 
 ### 4) The "Evaluation" folder
+It implements the function to evaluate the models; it also contains the "table.py" code to store the resulting metrics in a table together with the training time: the higher values of accuracy, precision and f1 score are highlighted.
 
 #### 4.1) Train_Torch functions:
 - __accuracy__ function_: This function computes the accuracy of the model's predictions compared to the target labels. It takes the model's predictions (outputs) and the target labels (targets) as input and returns a scalar value representing the accuracy.
