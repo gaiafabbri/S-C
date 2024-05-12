@@ -12,8 +12,8 @@ For the TMVA analysis, the most performing model seems to be the CNN, followed i
 As far as the Python analysis is concerned, the results between the different models are very similar and all the models seem to perform quite well in the classification. The Torch CNN is the one with the higher accuracy and precision, while the DNN has the better F1 score; however, the values for the other model are not far from the optimum and in general they are about 86% for all the models. Again, the CNN with Keras has the slowest training time of 66 s, but the other models take 11 s, 5 s and 21 s for Torch CNN, BDT and DNN respectively. Confusion matrices were also computed to evaluate the performance of the classifiers: on the test dataset of 40,000 events, all models show about 17,000 true positives and true negatives, for a total of 34,000 correctly identified events; only the BDT performs slightly worse, with about 16,000 true positives and 16,000 true negatives. The ROC curves obtained from the Python analysis are quite consistent with the TMVA curves, as the CNN (both with Keras and PyTorch) and DNN curves almost overlap, while the BDT curve is slightly lower.
 
 <p align="center">
-  <img width="500" height="380" src="https://github.com/gaiafabbri/S-C/blob/main/Classification_results/Comparison_among_models_100000_16x16.png">
-  <img width="500" height="380" src="https://github.com/gaiafabbri/S-C/blob/main/Classification_results/Results.png">
+  <img width="550" height="380" src="https://github.com/gaiafabbri/S-C/blob/main/Classification_results/Comparison_among_models_100000_16x16.png">
+  <img width="620" height="340" src="https://github.com/gaiafabbri/S-C/blob/main/Classification_results/Results.png">
 </p>
 
 For each model, together with the ROC curve, also the training plot is shown; for the DNN and the CNN both with Keras and PyTorch the loss and the accuracy are monitored both on the training and test dataset. For the BDT only the loss for training and test is reported
