@@ -1,5 +1,5 @@
+from PIL import Image, ImageDraw, ImageFont
 import pandas as pd
-import matplotlib.pyplot as plt
 
 
 ''' -------------- SAVING METRICS AND TRAINING TIME --------------------'''
@@ -8,12 +8,12 @@ import matplotlib.pyplot as plt
  2) Visualizes it using Matplotlib.
  3) If no model results are provided, it prints a message: "No results to save.".
  4) It first checks if a DataFrame is provided, and if not, it creates a new DataFrame with predefined columns.
- 5) Then, it iterates through the provided model results.
+ 5) Then, it iterates through the provided model results: they include the model name, the accuracy, the precision, the f1-score and the training time
  6) Adds them to the DataFrame.
- 7) Draws a table using Matplotlib.
- 8) The function highlights the cells containing the maximum values of specified columns.
- 9) Finally, it saves the table as a PNG image and prints a confirmation message.
+ 7) Draws the table: it relies on Pillow to create a void images with specified dimensions (img_width e img_height) and then draws the table (and its content) wiht ImageDraw
+ 8) Finally, it saves the table as a PNG image and prints a confirmation message.
 '''
+
 def save_results_table(model_results, results_df):
     if not model_results:
         print("No results to save.")
@@ -28,37 +28,38 @@ def save_results_table(model_results, results_df):
         accuracy, precision, f1, training_time = model_metrics
         results_df.loc[len(results_df)] = [model_name, accuracy, precision, f1, training_time]
 
-    # Draw the table
-    plt.figure(figsize=(10, 5))
+    # Create a blank image with specified dimensions
+    img_width = 800  # Set as per your requirement
+    img_height = 400  # Set as per your requirement
+    img = Image.new('RGB', (img_width, img_height), color='white')
+    #Draw the image
+    draw = ImageDraw.Draw(img)
 
-    table = plt.table(cellText=results_df.values, colLabels=results_df.columns, loc='center')
+    # Define table dimensions
+    table_width = 700
+    table_height = 300
+    cell_width = table_width / len(results_df.columns)
+    cell_height = table_height / (len(results_df) + 1)  # +1 for the header row
 
-    # Aesthetic
-    for j in range(len(results_df.columns)):
-        table._cells[0, j].set_facecolor('lightgrey')
-    for i in range(len(results_df)):
-        table._cells[i+1, 0].set_facecolor('lightblue')
+    # Define font properties
+    font = ImageFont.load_default()
+    font_size = 12
 
-    # Serching for best results
-    columns_of_interest = ['Accuracy', 'Precision', 'F1 Score']
+    # Draw table headers
+    for i, column in enumerate(results_df.columns):
+        draw.rectangle([i * cell_width, 0, (i + 1) * cell_width, cell_height], outline='black', fill='lightgrey')
+        draw.text((i * cell_width + 5, 5), column, fill='black', font=font)
 
-    # Dictionary to store the indices of maximum values for each column
-    max_indices = {}
+    # Draw table content
+    for i, row in enumerate(results_df.values):
+        for j, cell in enumerate(row):
+            draw.rectangle([j * cell_width, (i + 1) * cell_height, (j + 1) * cell_width, (i + 2) * cell_height],
+                           outline='black', fill='white')
+            draw.text((j * cell_width + 5, (i + 1) * cell_height + 5), str(cell), fill='black', font=font)
 
-    # Iterating through the columns of interest
-    for column in columns_of_interest:
-        max_index = results_df[column].idxmax()
-        max_indices[column] = max_index
+    # Save the image
+    img.save('Python_code/plot_results/Results.png')
 
-    # Coloring the cells with maximum values
-    for column, max_index in max_indices.items():
-        table._cells[max_index + 1, results_df.columns.get_loc(column)].set_facecolor('lightgreen')  # +1 to offset the table header
-
-
-    # Saving table
-    plt.savefig('Python_code/plot_results/Results.png', bbox_inches='tight', pad_inches=0.05)
-
-    plt.close()
-
-    print("La tabella dei risultati è stata aggiornata e salvata come Results.png")
+    print("The results have been updated in the table saved as Results.png")
     return results_df
+
