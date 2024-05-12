@@ -70,7 +70,7 @@ The overall requirements are reported in the "requirements.txt" file in the fold
 - _Project Cleanup_: Removes directories from previous runs, including "ROOT/images", "Python_code/images", "Python_code/plot_results", and all "pycache" folders within "Python_code" and its subdirectories. This task is handled by the "generate_delete_command" function
 - _ROOT and Python Verification_: Checks for the presence of ROOT and Python on the computer and ensures their compatibility with the tested code version. If Python and/or ROOT are not present, or if their versions are incompatible, the dockerfile is executed. Additionally, it verifies the presence and version of pip for potential Python library installation. This code is executed by the "check_python", "check_root_version", and "check_pip" functions.
 - _Library Compatibility Check and Update_: Asks the user if they want to verify the presence and compatibility of necessary libraries. If the user chooses not to verify, a message displaying the versions used is printed to the terminal. If the user opts for verification, missing libraries are installed if desired, otherwise the user is prompted to use the dockerfile. If libraries are present but outdated, they are updated to the tested version. If they are more recent than the tested version, they are adjusted. Both actions are performed only if the user desires; otherwise, the code continues its execution, although consequences may be unknown. This code is executed by the "update_python_libraries" function.
-- _Dataset Generation/Downloading_: the user has to decide whether to download the dataset using wget or to generate it; the former requires wget to be installed, but the latter takes time to complete the generation of 100000 events. __Note:__ the code is optimised to run with 100000 events and in this case the better performances are obtained, especially for the stability of the training (looking at the training history); however, the dimension of this file is too large to be managed by wget, so I chose a dataset of only 10000 events to download. If the user wants to run the code using the dockerfile, they will have to download the dataset using wget. __In any case, always check that the filename is correct in both the Python code and the TMVA code__.
+- _Dataset Generation/Downloading_: the user has to decide whether to download the dataset using wget or to generate it; the former requires wget to be installed, but the latter takes time to complete the generation of 100000 events. __Note:__ the code is optimised to run with 100000 events and in this case the better performances are obtained, especially for the stability of the training (looking at the training history); however, the dimension of this file is too large to be managed by wget, so I chose a dataset of only 10000 events to download. __Sometimes the download with wget does not work since the file is downloaded with html format and not as a root file; please check that the file downloaded is actually a root file.__ If the user wants to run the code using the dockerfile, the dataset must be catched with wget or downloading it by the "__images_backup__" folder. __In any case, always check that the filename is correct in both the Python code and the TMVA code__.
 - _Copying Dataset_:The "images" folder containing the dataset is copied and moved to the "CNN_python" and "TMVA_ML" directories. This code is executed by "move_images_folders" function.
 -  _File Presence Verification_: Verifies the presence of the file in various subdirectories.This code is executed by "check_root_file" function. 
 -  _Training Environment Selection_: Asks the user to choose whether to start training with ROOT or Python. Then, the user can decide if they want to experiment with the other file as well. This is managed in the main script through keyboard commands.
@@ -115,18 +115,32 @@ If you prefer to run the dockerfile directly, follow these instructions:
 
 ### Python dockerfile
 
-Download the dataset as done above into the 'S-C' folder:
+Download the dataset as done above into the '__S-C__' folder:
 
 $ wget "https://drive.google.com/uc?export=download&id=1U3NjuMTeNWjFe9Rgen64FauayAMxZTel" -O images_data_16x16_100000.root
 
-The user must extract the 'dockerfile_Python' and 'requirements.txt' files from the 'Docker_Folder' and place them in the 'S-C' folder, then run dockerfile in 'S-C' from the terminal:
+The next step is to transfer the dataset to the folder labelled "__Python_code__". Once this has been done, navigate to the same folder.
 
-$ docker build -t <name_image> -f dockerfile_Python .
+$ docker build -t <name_image> .
 
 $ docker run --rm -it <name_image>
+
+$ python3 Program_Start.py
 
 
 ### ROOT dockerfile
 
+Download the dataset as done above into the '__S-C__' folder:
+
+$ wget "https://drive.google.com/uc?export=download&id=1U3NjuMTeNWjFe9Rgen64FauayAMxZTel" -O images_data_16x16_100000.root
+
+The next step is to transfer the dataset to the folder labelled "__Python_code__". Once this has been done, navigate to the same folder.
+
+$ docker build -t <name_image> .
+
+$ docker run --rm -it <name_image>
+
+$ root -l -b -q TMVA_Classification.C
 
 
+**N.B.: If the file is downloaded not as root file (please verify it before continuing) the user can use a backup dataset in the folder, by simply rename it as "images" and copy this folder in the two main directory**
