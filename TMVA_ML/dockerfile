@@ -1,0 +1,29 @@
+############################
+#get the latest ROOT images#
+############################
+
+FROM rootproject/root:latest
+
+###########################
+#set the working directory#
+###########################
+WORKDIR /app
+
+###############################
+#copy in the working directory#
+###############################
+
+COPY ../images images
+COPY TMVA_Classification.C TMVA_Classification.C
+
+###########################################
+#update the system and install dependences#
+###########################################
+
+RUN apt-get update && apt-get install -y libblas-dev
+
+#####################################
+# Execution of TMVA_Classification.C#
+#####################################
+
+CMD ["root", "-l", "-b", "-q", "TMVA_Classification.C"]
