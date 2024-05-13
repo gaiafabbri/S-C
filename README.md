@@ -44,7 +44,7 @@ The project structure includes:
 - the folder "__TMVA_plot__" contains some plots automatically originated by the "TMVA_Classification.C" macro; it include the trainign history, the BDT construction scheme, the signal probability distribution and the PDF for CNN and DNN. A further description is provided in the respective section "TMVA Analysis Results".
 - the "__Classification_results__" folder contains the final plots displaying the ROC curves for TMVA and python analysis for all models, making thus a comparison between them; it containes also the individual ROC curve for each python model together with a plot of the training history.
 - the "__analysis_results__" folder contains:
-    -  the plot obtained by running the "Analysis.py" script
+    -  the plot obtained by running the "Analysis.py" script in "analysis_plots" folder
     -  the "Analysis.py" script performs some analysis on the input images, as the pixel intensity distribution and the correlation between pixels; more details are reported below
     -  "DataPreparation" folder, which manage the load and normalise functions, as well as a reshape function using "Data_Preparation.py".
 - the "__images_backup__" folder contains a backup dataset of 10000 events; it is impossible to upload the whole dataset of 100000 events for the large dimension. It is necessary in the case the users has no ROOT installed and uses dockerfiles. 
