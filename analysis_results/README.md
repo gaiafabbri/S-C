@@ -36,7 +36,7 @@ This code implements some function to analyse and visualize the input data; seve
   <img width="550" height="300" src="https://github.com/gaiafabbri/S-C/blob/main/analysis_results/plot_intensity_profile.png">
 </p>
 
-The resulting plots are saved in this folder "__analysis_results__" and show no significant differences between signal and background events; the pixel distribution and the pixel intensity distribution have a comparable behaviour, with some differences due to the intrinsic nature of the data. The same can be observed for the intensity profile and the cluster histograms: the two classes are distinguishable, but there is no bias in the distributions that could have affected the training, resulting in an overly simple classification.
+The resulting plots are reported in this folder "__analysis_results__" and show no significant differences between signal and background events; the pixel distribution and the pixel intensity distribution have a comparable behaviour, with some differences due to the intrinsic nature of the data. The same can be observed for the intensity profile and the cluster histograms: the two classes are distinguishable, but there is no bias in the distributions that could have affected the training, resulting in an overly simple classification.
 
 ## How to run:
 The script "Analysis.py" must be moved in the  main folder and then: 
