@@ -38,14 +38,27 @@ from Evaluation.Table import save_results_table
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 # Check whether the 'plot_results' folder exists
-if not os.path.exists("Python_code/plot_results"):
-    os.makedirs("Python_code/plot_results") ## If it does not exist, create it
+if not os.path.exists("plot_results"):
+    os.makedirs("plot_results") ## If it does not exist, create it
 
 '''------------------ DATA LOADING & NORMALIZATION ------------------'''
     
-folder_path = "Python_code/images"
+folder_path = "images"
+file_names = ["images_data_16x16_10000.root", "images_data_16x16_100000.root"]
 
-file_name = "images_data_16x16_10000.root"
+existing_file = None
+
+for file_name in file_names:
+    file_path = os.path.join(folder_path, file_name)
+    if os.path.exists(file_path):
+        existing_file = file_name
+        break
+
+if existing_file:
+    print("The file", existing_file, "is present in the folder.")
+else:
+    print("Neither of the two files is present in the folder.")
+
 
 # Extracting dimensions
 dimensions_str = file_name.split("_")[2]
@@ -322,7 +335,7 @@ while True:
         plt.legend()
         
         # Saving
-        plt.savefig(f"Python_code/plot_results/Comparison_among_models_{event_number}_{width}x{height}.png")
+        plt.savefig(f"plot_results/Comparison_among_models_{event_number}_{width}x{height}.png")
         
         # Show figure
         plt.tight_layout()
@@ -330,7 +343,7 @@ while True:
         
         
         break
-    plt.savefig(f"Python_code/plot_results/{available_options[choice]}_{event_number}_{width}x{height}.png")
+    plt.savefig(f"plot_results/{available_options[choice]}_{event_number}_{width}x{height}.png")
     plt.tight_layout()
     plt.show()
     # Store metrics in a dictionary
