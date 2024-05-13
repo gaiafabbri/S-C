@@ -74,7 +74,7 @@ def save_results_table(model_results, results_df):
             draw.text((j * cell_width + 5, (i + 1) * cell_height + 5), str(cell), fill='black', font=font)
 
     # Save the image
-    img.save('Python_code/plot_results/Results.png')
+    img.save('plot_results/Results.png')
 
     print("The results have been updated in the table saved as Results.png")
     return results_df
