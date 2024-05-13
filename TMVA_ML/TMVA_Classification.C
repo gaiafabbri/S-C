@@ -35,13 +35,23 @@ void TMVA_Classification(int nevts = 1000, std::vector<bool> opt = {1, 1, 1})
  
     //Accessing the input file, printin an error message if the file is not found
    int imgSize = 16 * 16;
-   TString inputFileName = "TMVA_ML/images/images_data_16x16_100000.root";
- 
-   bool fileExist = !gSystem->AccessPathName(inputFileName);
- 
-   // if file does not exists
-    if (!fileExist) {
-        std::cout << "error: the file is not present" << std::endl;
+    std::string inputFileNameBase = "images/images_data_16x16_";
+    //Default files
+    TString inputFileName = inputFileNameBase + "100000.root";
+    
+    bool fileFound = !gSystem->AccessPathName(inputFileName);
+
+    // if does not exit try another type of file
+    if (!fileFound) {
+        inputFileName = inputFileNameBase + "10000.root";
+        fileFound = !gSystem->AccessPathName(inputFileName);
+    }
+
+    
+    if (fileFound) {
+        std::cout << "File trovato: " << inputFileName << std::endl;
+    } else {
+        std::cout << "Errore: nessuno dei due file è stato trovato" << std::endl;
     }
 
 //-----------------------------------------------------------------------------------
@@ -337,7 +347,6 @@ Note that to run the CNN is required to have CPU  or GPU support
  
     auto c1 = factory.GetROCCurve(&loader);
     c1->Draw();
-     //c1->Print("arturo.pdf");
   
     // close outputfile to save output file
     outputFile->Close();
