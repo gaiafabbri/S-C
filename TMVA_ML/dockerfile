@@ -1,0 +1,12 @@
+FROM rootproject/root:latest
+
+WORKDIR /app
+
+COPY ../images images
+COPY TMVA_Classification.C TMVA_Classification.C
+
+RUN apt-get update && apt-get install -y libblas-dev
+
+
+# Execution of TMVA_Classification.C
+CMD ["root", "-l", "-b", "-q", "TMVA_Classification.C"]
