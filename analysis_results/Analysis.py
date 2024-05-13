@@ -5,10 +5,8 @@ from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans, DBSCAN
 from sklearn.mixture import GaussianMixture
 import os
-from DataPreparation.Data_Preparation import load_and_normalize_images
+from DataPreparation.Data_Preparation import load_and_normalize_images, apply_reshape
 from numpy.fft import fftshift, fft2
-from DataPreparation.reshaping import apply_reshape
-
 
 '''------------------ FUNCTIONS DEFINITIONS ------------------'''
 
@@ -133,12 +131,25 @@ def plot_intensity_profile(image_data1,image_data2, axis='row'):
 '''------------------ DATA LOADING & VARIABLES EXTRACTION ------------------'''
 
 folder_path = "images"
-file_name = "images_data_16x16_100000.root"
+file_names = ["images_data_16x16_10000.root", "images_data_16x16_100000.root"]
 
-results_folder = "analysis_results"
+existing_file = None
+
+for file_name in file_names:
+    file_path = os.path.join(folder_path, file_name)
+    if os.path.exists(file_path):
+        existing_file = file_name
+        break
+
+if existing_file:
+    print("The file", existing_file, "is present in the folder.")
+else:
+    print("Neither of the two files is present in the folder.")
+    
+results_folder = "analysis_plots"
 if not os.path.exists(results_folder):
     os.makedirs(results_folder)
-
+    
 # Estrazione delle dimensioni
 dimensions_str = file_name.split("_")[2]
 dimensions_without_extension = dimensions_str.split(".")[0]
