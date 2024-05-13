@@ -13,7 +13,7 @@ WORKDIR /app
 #copy in the working directory#
 ###############################
 
-COPY ../images images
+COPY images images
 COPY TMVA_Classification.C TMVA_Classification.C
 
 ###########################################
