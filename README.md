@@ -47,6 +47,7 @@ The project structure includes:
     -  the plot obtained by running the "Analysis.py" script in "analysis_plots" folder
     -  the "Analysis.py" script performs some analysis on the input images, as the pixel intensity distribution and the correlation between pixels; more details are reported below
     -  "DataPreparation" folder, which manage the load and normalise functions, as well as a reshape function using "Data_Preparation.py".
+    -  A dockerfile to set the environment.
 - the "__images_backup__" folder contains a backup dataset of 10000 events; it is impossible to upload the whole dataset of 100000 events for the large dimension. It is necessary in the case the users has no ROOT installed and uses dockerfiles. 
 
 Within this folder, plots and results have been described and compared; in addition, each folder contains descriptions of the code implemented, rationale for decisions, and model presentations to help the reader navigate through the project.
@@ -83,20 +84,21 @@ The overall requirements are reported in the "requirements.txt" file in the fold
 
 Once you're ready, clone the repository:
 
-$ git clone https://github.com/gaiafabbri/S-C.git 
+    $ git clone https://github.com/gaiafabbri/S-C.git 
 
 Navigate to the project directory:
 
-$ cd your/path/to/S-C
+    $ cd your/path/to/S-C
+
 ## Using script file
 
 Obtain permissions to execute the script:
 
-$ chmod +x Script.sh
+    $ chmod +x Script.sh
 
 Execute the bash script:
 
-$ ./Script.sh
+    $ ./Script.sh
 
 ## Run individual files
 
@@ -113,7 +115,8 @@ Alternatively, you can run individual files. First, make sure you have a dataset
         $ cp -r images analysis_results 
 
         $ rm -rf images
-2) Generating dataset: the user could generate its own dataset using the following lines:
+   
+3) Generating dataset: the user could generate its own dataset using the following lines:
        $ root -l -q "ROOT_Gen/Generation.C(100000, 16, 16)"
 
        $ cp -r images TMVA_ML/
@@ -160,36 +163,39 @@ Then user can run the project:
 
 ## Only dockerfile
 
-If you prefer to run the dockerfile directly, follow these instructions:
+If user prefers to run the dockerfile directly, uses the dataset in backup_images repeating the commands done in the previous section (see section "Run individual files" point 1). 
 
 ### Python dockerfile
 
-Download the dataset as done above into the '__S-C__' folder:
+If the user wants to run dockerfile in python, they should go to "__Python_code__" and run docker:
 
-$ wget "https://drive.google.com/uc?export=download&id=1U3NjuMTeNWjFe9Rgen64FauayAMxZTel" -O images_data_16x16_100000.root
+    $ cd Python_code
+    
+    $ docker build -t <name_image> .
 
-The next step is to transfer the dataset to the folder labelled "__Python_code__". Once this has been done, navigate to the same folder.
+    $ docker run --rm -it <name_image>
 
-$ docker build -t <name_image> .
-
-$ docker run --rm -it <name_image>
-
-$ python3 Program_Start.py
-
+    $ python3 Program_Start.py
 
 ### ROOT dockerfile
 
-Download the dataset as done above into the '__S-C__' folder:
+If the user wants to run dockerfile in ROOT, they should go to "__TMVA_ML__" and run docker:
 
-$ wget "https://drive.google.com/uc?export=download&id=1U3NjuMTeNWjFe9Rgen64FauayAMxZTel" -O images_data_16x16_100000.root
+    $ cd TMVA_ML 
 
-The next step is to transfer the dataset to the folder labelled "__Python_code__". Once this has been done, navigate to the same folder.
+    $ docker build -t <name_image> .
 
-$ docker build -t <name_image> .
+    $ docker run --rm -it <name_image>
 
-$ docker run --rm -it <name_image>
+### Analysis dockerfile 
 
-$ root -l -b -q TMVA_Classification.C
+If the user wants to explore dataset and run dockerfile in python, they should go to "__analysis_results__" and run docker:
 
+    $ cd analysis_results 
 
-**N.B.: If the file is downloaded not as root file (please verify it before continuing) the user can use a backup dataset in the folder, by simply rename it as "images" and copy this folder in the two main directory**
+    $ docker build -t <name_image> .
+
+    $ docker run --rm -it <name_image>
+
+    $ python3 Analysis.py
+    
