@@ -16,7 +16,7 @@ SHELL ["/bin/bash", "-c"]
 # Copy necessary files into the container #
 ###########################################
 
-COPY ../images images
+COPY images images
 COPY DataPreparation DataPreparation
 COPY Evaluation Evaluation
 COPY Models Models
