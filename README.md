@@ -127,7 +127,8 @@ Alternatively, you can run individual files. First, make sure you have a dataset
        $ rm -rf images
        
 Then user can run the project:
-- Analysis: 
+- Analysis:
+
         $ cd analysis_results
 
         $ python3 Analysis.py
