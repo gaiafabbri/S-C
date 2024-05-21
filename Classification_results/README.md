@@ -15,13 +15,13 @@ As far as the Python analysis is concerned, the results between the different mo
   <img width="620" height="340" src="https://github.com/gaiafabbri/S-C/blob/main/Classification_results/Results.png">
 </p>
 
-Confusion matrices were also computed to evaluate the performance of the classifiers: on the test dataset of 40,000 events, all models show about 17,000 true positives and true negatives, for a total of 34,000 correctly identified events; only the BDT performs slightly worse, with about 16,000 true positives and 16,000 true negatives. The ROC curves obtained from the Python analysis are quite consistent with the TMVA curves, as the CNN (both with Keras and PyTorch) and DNN curves almost overlap, while the BDT curve is slightly lower.
+Confusion matrixes were also computed to evaluate the performance of the classifiers: on the test dataset of 40,000 events, all models show about 17,000 true positives and true negatives, for a total of 34,000 correctly identified events; only the BDT performs slightly worse, with about 16,000 true positives and 16,000 true negatives. The ROC curves obtained from the Python analysis are quite consistent with the TMVA curves, as the CNN (both with Keras and PyTorch) and DNN curves almost overlap, while the BDT curve is slightly lower.
 
 <p align="center">
   <img width="550" height="380" src="https://github.com/gaiafabbri/S-C/blob/main/Classification_results/Comparison_among_models_100000_16x16.png">
 </p>
 
-For each model, together with the ROC curve, also the training plot is shown; for the DNN and the CNN both with Keras and PyTorch the loss and the accuracy are monitored both on the training and test dataset. For the BDT only the loss for training and test is reported
+For each model, together with the ROC curve, also the training plot is shown; for the DNN and the CNN both with Keras and PyTorch the loss and the accuracy are monitored both on the training and test dataset. For the BDT only the loss for training and test is reported. It is important to underline that the training history show very stable curves with 100 000 events, while they are less uniform decreasing the dimensionality of the dataset.  
 
 <p align="center">
   <img width="500" height="220" src="https://github.com/gaiafabbri/S-C/blob/main/Classification_results/BDT_100000_16x16.png">
