@@ -32,7 +32,7 @@ The reduction of dimensionality is handled by the following functions:
 - The "__find_optimal_num_components()__" function calculates the optimal number of principal components required to explain a specified percentage (95%) of the total variance in the dataset. It achieves this by fitting a PCA model to the normalized data and computing the cumulative explained variance ratio to determine the number of components needed.
 - The "__apply_pca()__" function applies PCA to the normalized data with the specified number of components (stored in the variable "num_components"). It returns the transformed data after dimensionality reduction.
 
-### 2.3) PREPARING DATASET via Principal Component Analysis (PCA): "PCA.py"
+### 2.3) PREPARING DATASET: "Preparing_Dataset.py"
 The dataset preparation is handled by the "Control_PCA()" function, which takes features (X), labels (y), image width, and height as inputs and performs the following tasks:
 - In the event that the selected model is one of the DNN, CNN with Torch or TensorFlow-Keras, the code will perform PCA on the dataset. This is achieved by invoking the "find_optimal_num_components()" and "apply_pca()" functions from "PCA.py" and additionally calling the "apply_shuffle()" function from "Data_Preparation.py" to shuffle the data.
 - If the model is instead BDT, the X and y datasets are left unaltered and recalled as X_new.
@@ -59,16 +59,16 @@ It implements the function to evaluate the models; it also contains the "table.p
 
 ### 4.2) Prediction_BDT functions:
 - __BDT_eval()__: This function evaluates the performance of the Boosted Decision Trees (BDT) model on the test data. It takes the trained model, the test data (X_test), and their corresponding labels (y_test) as input. The function utilizes the model to make predictions on the test data and calculates the accuracy, precision, and F1 score of the predictions. It returns the model's predictions, the rounded binary predictions, precision, F1 score, and accuracy.
-- __print_ROC_BDT()__: This function computes and displays the Receiver Operating Characteristic (ROC) curve and the confusion matrix of the Boosted Decision Trees (BDT) model on the test data. It takes the test labels (y_test), the model's continuous predictions (y_pred), and the rounded binary predictions (y_pred_binary) as input. The function computes the ROC curve using the continuous predictions and visualizes the confusion matrix. It returns the background rejection rate and the signal efficiency.
+- __print_ROC_BDT()__: This function computes and displays the Receiver Operating Characteristic (ROC) curve and the confusion matrix of the Boosted Decision Trees (BDT) model on the test data. It takes the test labels (y_test), the model's continuous predictions (y_pred), and the rounded binary predictions (y_pred_binary) as input. The function computes the ROC curve using the continuous predictions and visualizes the confusion matrix which is printed on the shell. It returns the background rejection rate and the signal efficiency.
 - __plot_training_curves_BDT()__: This function visualizes the training and test curves of evaluation metrics for the Boosted Decision Trees (BDT) model. It takes the dictionary of evaluation metrics (evals_result) returned during the model training process and plots the log-loss curves for training and testing.
 
 
-#### 4.3) PredictionNN functions:
+### 4.3) PredictionNN functions:
 - __eval_Neural_Networks()__: This function evaluates the performance of the neural network on the test set. It takes the neural network model, the test data (X_test), and their corresponding labels (y_test) as input. The function utilizes the model's evaluate method to compute the loss and accuracy on the test data. It then makes predictions using the predict method and calculates the precision, F1 score, and accuracy of the predictions. The function returns the continuous predictions, rounded binary predictions, precision, F1 score, and accuracy.
 - __print_ROC()__: This function computes and displays the Receiver Operating Characteristic (ROC) curve and the confusion matrix of the neural network model on the test data. It takes the test labels (y_test), the model's continuous predictions (y_pred), and the rounded binary predictions (y_pred_classes) as input. The function calculates the ROC curve using the continuous predictions and visualizes the confusion matrix. It returns the background rejection rate and the signal efficiency.
 - __plot_training_curves_KERAS()__: This function visualizes the training and validation curves of the neural network. It takes the history object returned during the neural network training process and plots the accuracy and loss curves for training and validation.
 
-#### 4.4) Table function:
+### 4.4) Table function:
 Inside the Table file, the save_results_table function is designed to save the evaluation metrics results of the models (f1, accuracy, precision) and the training time into a Pandas DataFrame, and then draw a table using Matplotlib. Here are the parameters:
 - "model_results":  A dictionary containing the evaluation metrics results for each model. The keys of the dictionary are the model names, and the values are tuples containing accuracy, precision, f1 score, and training time.
 - "results_df": The Pandas DataFrame containing the models' evaluation results. If it's None (i.e., when the code is run for the first time), a new DataFrame will be created.
