@@ -2,14 +2,14 @@
 # Comments on results obtained
 
 ## TMVA results:
-For the TMVA analysis, the most performing model seems to be the CNN, followed immediately by the DNN; the BDT semms a little worst in classification. The ROC-integer for each model is respectively 0.941, 0.937 and 0.821, with the CNN which shows also the better signal efficiency (0.955, 0,950 and 0.781 for the 30% of background, respectively). CNN and DNN show very similar behaviour, while the BDT model is a little more discriminative, but still performs an efficient classification. However, the BDT shows a fast training, with 32 s for training and 0.65 s for evaluation; the DNN is also faster, with 17 s for training and 1.2 s for evaluation. The CNN is significantly slower, with 170 s for training and 8 s for evaluation.
+For the TMVA analysis, the most performing model seems to be the CNN, followed immediately by the DNN; the BDT seems a little worst in classification. The ROC-integer for each model is respectively 0.941, 0.937 and 0.821, with the CNN which shows also the better signal efficiency (0.955, 0,950 and 0.781 for the 30% of background, respectively). CNN and DNN show very similar behaviour, while the BDT model is a little more discriminative, but still performs an efficient classification. However, the BDT shows a fast training, with 32 s for training and 0.65 s for evaluation; the DNN is also faster, with 17 s for training and 1.2 s for evaluation. The CNN is significantly slower, with 170 s for training and 8 s for evaluation.
 
 <p align="center">
   <img width="500" height="380" src="https://github.com/gaiafabbri/S-C/blob/main/Classification_results/TMVA_ROC.png">
 </p>
 
 ## Python results:
-As far as the Python analysis is concerned, the results between the different models are very similar and all the models seem to perform quite well in the classification. The DNN is the model with the highest accuracy, f1-score and precision; however, the values for the other model are not far from the optimum and in general they are about 85% for all the models. Again, the CNN with Keras has the slowest training time of 32 s, but the other models take 11 s, 5 s and 22 s for Torch CNN, BDT and DNN respectively. 
+As far as the Python analysis is concerned, the results between the different models are very similar and all the models seem to perform quite well in the classification. The DNN is the model with the highest accuracy, f1-score and precision; however, the values for the other model are not far from the optimum and in general they are about 85% for all the models. Again, the CNN with Keras has the slowest training time of 37 s, but the other models take 11 s, 5 s and 22 s for Torch CNN, BDT and DNN respectively. However, the training time of the CNN can reach a higher value, up to 70 s: in the code, the training loss is monitored during the training, and when it does not improve anymore, the training is stopped, but without reaching the predefined number of epochs. The same control is implemented for the DNN, but in this case there is no significant improvement in the training time.
 
 <p align="center">
   <img width="620" height="340" src="https://github.com/gaiafabbri/S-C/blob/main/Classification_results/Results.png">
