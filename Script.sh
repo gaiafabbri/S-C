@@ -344,7 +344,8 @@ main() {
                     cd Python_code
                     python3 Program_Start.py
                     cd ..
-                    ;;
+                    echo "You have completed the analysis. Goodbye!"
+                    exit;;
                 *)
                     echo "Invalid selection."
                     ;;
