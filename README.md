@@ -116,6 +116,8 @@ Alternatively, you can run individual files. First, make sure you have a dataset
         $ rm -rf images
    
 3) Generating dataset: the user could generate its own dataset using the following lines:
+
+   
        $ root -l -q "ROOT_Gen/Generation.C(100000, 16, 16)"
 
        $ cp -r images TMVA_ML/
