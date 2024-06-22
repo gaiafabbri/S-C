@@ -201,8 +201,6 @@ Gen_files(){
             [Gg]* ) root -l -q "ROOT_Gen/Generation.C(100000, 16, 16)"; break;;
             [Bb]* )
                     cp -r images_backup images
-                    mv images ROOT_Gen
-                    echo "The 'images' folder has been moved to the 'ROOT_Gen' folder."
                     break
                     ;;
             * ) echo "Please choose g to generate or b for backup.";;
@@ -229,19 +227,17 @@ delete_all_pycache_folders() {
 ###################################
 
 move_images_folders() {
-    # First objective: Move the "images" folder out of "ROOT"
-    mv "ROOT_Gen/images" "./"
 
-    # Second objective: Make a copy and move it into "TMVA_ML"
+    # Make a copy and move it into "TMVA_ML"
     cp -r "images" "TMVA_ML/"
 
-    # Third objective: Make a copy and move it into "Python_code"
+    # Make a copy and move it into "Python_code"
     cp -r "images" "Python_code/"
     
-    # Fourth objective: Make a copy and move it into "analysis_results"
+    # Make a copy and move it into "analysis_results"
     cp -r "images" "analysis_results/"
 
-    # Fourth objective: Delete "images" at the top level
+    # Delete "images" at the top level
     rm -rf "images"
 }
 
@@ -280,6 +276,7 @@ main() {
         done
 
         echo "Alright, let's start."
+        
         generate_delete_command "ROOT_Gen/images"
         Gen_files
         move_images_folders
