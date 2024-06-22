@@ -205,7 +205,7 @@ Gen_files(){
                     echo "The 'images' folder has been moved to the 'ROOT_Gen' folder."
                     break
                     ;;
-            * ) echo "Please choose g to generate or d to download.";;
+            * ) echo "Please choose g to generate or b for backup.";;
         esac
     done
 }
