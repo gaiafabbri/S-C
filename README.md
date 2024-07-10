@@ -120,7 +120,7 @@ Alternatively, you can run individual files. First, make sure you have a dataset
    
        $ root -l -q "ROOT_Gen/Generation.C(100000, 16, 16)"
 
-       $ cp -r images TMVA_ML/
+       $ cp -r images TMVA_ML
 
        $ cp -r images Python_code 
 
